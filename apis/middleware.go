@@ -1,6 +1,7 @@
 package apis
 
 import (
+	"encoding/json"
 	"net/http"
 	"os"
 	"strings"
@@ -39,12 +40,18 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		token := r.Header.Get("Authorization")
 		if token != "" {
 			token := strings.TrimPrefix(token, "Bearer ")
-			_, err := auth.GetUserIdentity(token, os.Getenv("AUTH_SECRET"))
+			user, err := auth.GetUserIdentity(token, os.Getenv("AUTH_SECRET"))
 			if err != nil {
 				log.Info("Invalid user token: %v", err)
 			} else {
-				// TODO: manage user identity
-				next.ServeHTTP(w, r)
+				userData, err := json.Marshal(user)
+				if err != nil {
+					log.Info("Invalid user structure: %v", err)
+					return
+				}
+				reqClone := r.Clone(r.Context())
+				reqClone.Header.Set("X-User-Info", string(userData))
+				next.ServeHTTP(w, reqClone)
 				return
 			}
 		}
