@@ -34,22 +34,22 @@ func Println(text ...any) {
 	fmt.Println(text...)
 }
 
-func Printfln(msg string, text ...any) {
-	fmt.Printf(msg+"\n", text...)
+func Printfln(msg string, args ...any) {
+	fmt.Printf(msg+"\n", args...)
 }
 
-func Debug(msg string, text ...any) {
-	logger.Debug(msg, text...)
+func Debug(msg string, args ...any) {
+	logger.Debug(fmt.Sprintf(msg, args...))
 }
 
-func Warn(msg string, text ...any) {
-	logger.Warn(msg, text...)
+func Warn(msg string, args ...any) {
+	logger.Warn(fmt.Sprintf(msg, args...))
 }
 
-func Info(msg string, text ...any) {
-	logger.Info(msg, text...)
+func Info(msg string, args ...any) {
+	logger.Info(fmt.Sprintf(msg, args...))
 }
 
-func Error(msg string, text ...any) {
-	logger.Error(msg, text...)
+func Error(msg string, args ...any) {
+	logger.Error(fmt.Sprintf(msg, args...))
 }
