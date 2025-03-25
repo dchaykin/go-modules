@@ -32,16 +32,9 @@ func (j userToken) Partner() string {
 }
 
 func (j userToken) Role(name string) string {
-	var claim interface{}
-	var ok bool
-	switch name {
-	case "inquiry":
-		claim, ok = j.Claims["roleInquiry"]
-	default:
-		claim, ok = j.Claims["role"]
-	}
+	claim, ok := j.Claims[name]
 	if !ok {
-		log.Warn("Claim 'role' for %s not found", name)
+		log.Warn("Role '%s' is not claimed", name)
 		return ""
 	}
 	return claim.(string)
