@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"runtime"
 )
 
 const (
@@ -51,5 +52,7 @@ func Info(msg string, args ...any) {
 }
 
 func Error(msg string, args ...any) {
-	logger.Error(fmt.Sprintf(msg, args...))
+	buf := make([]byte, 1024)
+	runtime.Stack(buf, false)
+	logger.Error(fmt.Sprintf(msg, args...), "Stacktrace", string(buf))
 }
