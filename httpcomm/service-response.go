@@ -85,3 +85,12 @@ func (resp ServiceResponse) WriteData(w http.ResponseWriter, format PayloadForma
 	}
 	fmt.Fprintf(w, "%v", b)
 }
+
+func (resp ServiceResponse) GetPayload() ([]byte, error) {
+	buf := new(bytes.Buffer)
+	e := json.NewEncoder(buf)
+	if err := e.Encode(resp.Data); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
