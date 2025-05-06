@@ -188,7 +188,7 @@ func LoadDataModel(path string, role string) (*TenantConfig, error) {
 
 	tc.Roles = nil
 
-	if tc.ComboboxInfo != nil {
+	if tc.ComboboxInfo != nil && tc.ComboboxInfo.FileName != "" {
 		tenantCmbs, err := loadTenantComboboxList(path, tc.ComboboxInfo.FileName, tc.ComboboxInfo.Version)
 		if err != nil {
 			return nil, err
