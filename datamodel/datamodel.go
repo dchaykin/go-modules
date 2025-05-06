@@ -202,7 +202,7 @@ func LoadDataModel(path string, role string) (*TenantConfig, error) {
 }
 
 func readDataModel(path string) ([]byte, error) {
-	fileName := fmt.Sprintf("%s/custom-fields.json", path)
+	fileName := fmt.Sprintf("%s/datamodel.json", path)
 	return os.ReadFile(fileName)
 }
 
