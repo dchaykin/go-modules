@@ -2,6 +2,7 @@ package datamodel
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -29,6 +30,26 @@ func (de testDomainEntity) CollectionName() string {
 
 func (de testDomainEntity) Entity() map[string]interface{} {
 	return de.Data
+}
+
+func (de testDomainEntity) ValueString(fieldName string) string {
+	return ""
+}
+
+func (de testDomainEntity) ValueInt(fieldName string) int {
+	return 0
+}
+
+func (de testDomainEntity) ValueFloat(fieldName string) float32 {
+	return 0
+}
+
+func (de testDomainEntity) ValueDate(fieldName string) time.Time {
+	return time.Now()
+}
+
+func (de testDomainEntity) ValueBool(fieldName string) bool {
+	return false
 }
 
 func TestEnsureUUID(t *testing.T) {
