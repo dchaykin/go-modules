@@ -27,6 +27,10 @@ func (de testDomainEntity) CollectionName() string {
 	return "test"
 }
 
+func (de testDomainEntity) Entity() map[string]interface{} {
+	return de.Data
+}
+
 func TestEnsureUUID(t *testing.T) {
 	doc := testDomainEntity{}
 

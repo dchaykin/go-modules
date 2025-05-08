@@ -5,4 +5,5 @@ type DomainEntity interface {
 	SetUUID(uuid string)
 	DatabaseName() string
 	CollectionName() string
+	Entity() map[string]interface{}
 }
