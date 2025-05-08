@@ -214,7 +214,7 @@ func (ms mongoSession) GetEntityByUUID(uuid string, requestedObject datamodel.Do
 		return false, err
 	}
 
-	found, err := collection.findOne(context.Background(), bson.M{"uuid": uuid}, requestedObject)
+	found, err := collection.findOne(context.Background(), bson.M{"entity.uuid": uuid}, requestedObject)
 	if err != nil {
 		return false, fmt.Errorf("GetObjectByRefNo failed. Could not create a query for %v: %v", requestedObject, err)
 	}
@@ -242,7 +242,7 @@ func (ms mongoSession) SaveEntityToHistory(entity datamodel.DomainEntity) error 
 		return err
 	}
 
-	err = collection.replaceOne(context.Background(), bson.M{"uuid": entity.UUID()}, entity, true)
+	err = collection.replaceOne(context.Background(), bson.M{"entity.uuid": entity.UUID()}, entity, true)
 
 	return err
 }
@@ -266,7 +266,7 @@ func (ms mongoSession) RemoveEntity(entity datamodel.DomainEntity) error {
 		return err
 	}
 
-	selector := bson.M{"uuid": entity.UUID()}
+	selector := bson.M{"entity.uuid": entity.UUID()}
 
 	err = collection.removeOne(context.Background(), selector)
 

@@ -91,7 +91,7 @@ func (c mongoCollection) insertOne(ctx context.Context, record interface{}) erro
 }
 
 func (c mongoCollection) updateEntity(ctx context.Context, doc datamodel.DomainEntity) error {
-	_, err := c.collection.UpdateOne(ctx, bson.M{"uuid": doc.UUID()}, bson.M{"$set": doc})
+	_, err := c.collection.UpdateOne(ctx, bson.M{"entity.uuid": doc.UUID()}, bson.M{"$set": doc})
 	if err != nil {
 		return err
 	}
@@ -252,7 +252,7 @@ func (ms mongoSession) ReplaceEntityByUUID(doc datamodel.DomainEntity, allowInse
 	}
 	coll := ms.GetCollection(doc.DatabaseName(), doc.CollectionName())
 	return mongo.WithSession(context.Background(), ms.session, func(sc mongo.SessionContext) error {
-		return coll.replaceOne(sc, bson.M{"uuid": doc.UUID()}, doc, allowInsert)
+		return coll.replaceOne(sc, bson.M{"entity.uuid": doc.UUID()}, doc, allowInsert)
 	})
 }
 
