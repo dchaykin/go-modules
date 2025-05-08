@@ -44,8 +44,8 @@ func (de testDomainEntity) ValueFloat(fieldName string) float32 {
 	return 0
 }
 
-func (de testDomainEntity) ValueDate(fieldName string) time.Time {
-	return time.Now()
+func (de testDomainEntity) ValueDate(fieldName string) *time.Time {
+	return nil
 }
 
 func (de testDomainEntity) ValueBool(fieldName string) bool {

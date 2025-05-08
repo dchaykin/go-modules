@@ -12,6 +12,6 @@ type DomainEntity interface {
 	ValueString(fieldName string) string
 	ValueInt(fieldName string) int
 	ValueFloat(fieldName string) float32
-	ValueDate(fieldName string) time.Time
+	ValueDate(fieldName string) *time.Time
 	ValueBool(fieldName string) bool
 }
