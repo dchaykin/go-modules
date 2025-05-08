@@ -6,16 +6,16 @@ import (
 	"os"
 )
 
-type TenantComboboxContent struct {
+type Combobox struct {
 	ID    string `json:"id"`
 	Value string `json:"value"`
 }
 
 type TenantCombobox struct {
-	Translate    *bool                   `json:"translate,omitempty"`
-	Content      []TenantComboboxContent `json:"content"`
-	Source       *string                 `json:"source,omitempty"`
-	NameInSource *string                 `json:"name,omitempty"`
+	Translate    *bool      `json:"translate,omitempty"`
+	Content      []Combobox `json:"content"`
+	Source       *string    `json:"source,omitempty"`
+	NameInSource *string    `json:"name,omitempty"`
 }
 
 type TenantComboboxList map[string]TenantCombobox
