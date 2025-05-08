@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/dchaykin/go-modules/datamodel"
 	"github.com/dchaykin/go-modules/log"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -16,12 +17,7 @@ import (
 
 const MAX_CONNECT_ATTEMPTS = 3
 
-const (
-	schemaData    = "data"
-	schemaHistory = "history"
-)
-
-type OnReadDomainEntity func(object DomainEntity) error
+type OnReadDomainEntity func(object datamodel.DomainEntity) error
 
 func getMongoHost() string {
 	return os.Getenv("MONGOHOST")
@@ -38,7 +34,7 @@ type DatabaseSession interface {
 	InsertOne(coll Collection, record interface{}) error
 	ReplaceOne(coll Collection, filter bson.M, replacement interface{}, allowInsert bool) error
 	UpdateOne(coll Collection, filter bson.M, replacement interface{}) error
-	FindEntity(coll Collection, filter bson.M, doc DomainEntity) (bool, error)
+	FindEntity(coll Collection, filter bson.M, doc datamodel.DomainEntity) (bool, error)
 	FindOne(coll Collection, filter bson.M, doc interface{}) (bool, error)
 	FindMany(coll Collection, filter bson.M, list interface{}) error
 	Extract(coll Collection, filter bson.M, result *[]interface{}, sort bson.D, offset, limit int64) (int64, error)
@@ -46,13 +42,13 @@ type DatabaseSession interface {
 	GetCollection(databaseName, collectionName string) Collection
 	GetDatabaseNames() ([]string, error)
 	GetCollectionNames(dbName string) ([]string, error)
-	GetEntityByUUID(uuid string, requestedObject DomainEntity) (bool, error)
-	InsertEntity(entity DomainEntity) error
-	UpdateEntityByUUID(updatedObject DomainEntity) error
-	SaveEntityToHistory(entity DomainEntity) error
-	ReplaceEntityByUUID(entity DomainEntity, allowInsert bool) error
+	GetEntityByUUID(uuid string, requestedObject datamodel.DomainEntity) (bool, error)
+	InsertEntity(entity datamodel.DomainEntity) error
+	UpdateEntityByUUID(updatedObject datamodel.DomainEntity) error
+	SaveEntityToHistory(entity datamodel.DomainEntity) error
+	ReplaceEntityByUUID(entity datamodel.DomainEntity, allowInsert bool) error
 	RemoveOne(collection Collection, selector bson.M) error
-	RemoveEntity(entity DomainEntity) error
+	RemoveEntity(entity datamodel.DomainEntity) error
 	CreateIndex(c Collection, mod mongo.IndexModel, opts ...*options.CreateIndexesOptions) error
 	Close() error
 }
@@ -183,18 +179,13 @@ func (mc mongoClient) GetCollection(dbName string, collectionName string) (colle
 	return mc.getCollectionByName(db, collectionName)
 }
 
-func (mc mongoClient) getCollectionData(dataObject DomainEntity) (collection Collection, err error) {
-	dbName := dataObject.DatabaseName()
-	return mc.GetCollection(dbName, schemaData)
-}
-
-func (mc mongoClient) getCollectionHistory(dataObject DomainEntity) (collection Collection, err error) {
+func (mc mongoClient) getCollectionHistory(dataObject datamodel.DomainEntity) (collection Collection, err error) {
 	dbName := dataObject.DatabaseName()
 	db := mc.DB(dbName)
 	if db == nil {
 		return nil, fmt.Errorf("could not connect to the database %s", dbName)
 	}
-	return mc.getCollectionByName(db, schemaHistory)
+	return mc.getCollectionByName(db, dataObject.CollectionName()+"-history")
 }
 
 func (mc mongoClient) getCollectionByName(db *mongo.Database, collectionName string) (result Collection, err error) {
@@ -213,12 +204,12 @@ func (ms mongoSession) Aggregate(dbName, collName string, match, group bson.M, r
 	return collection.aggregate(context.Background(), match, group, result)
 }
 
-func (ms mongoSession) GetEntityByUUID(uuid string, requestedObject DomainEntity) (bool, error) {
+func (ms mongoSession) GetEntityByUUID(uuid string, requestedObject datamodel.DomainEntity) (bool, error) {
 	if uuid == "" {
 		return false, fmt.Errorf("GetObjectByUUID failed. Got an empty UID")
 	}
 
-	collection, err := client.getCollectionData(requestedObject)
+	collection, err := client.GetCollection(requestedObject.DatabaseName(), requestedObject.CollectionName())
 	if err != nil {
 		return false, err
 	}
@@ -231,12 +222,12 @@ func (ms mongoSession) GetEntityByUUID(uuid string, requestedObject DomainEntity
 	return found, err
 }
 
-func (ms mongoSession) UpdateEntityByUUID(updatedObject DomainEntity) error {
+func (ms mongoSession) UpdateEntityByUUID(updatedObject datamodel.DomainEntity) error {
 	if updatedObject.UUID() == "" {
 		return fmt.Errorf("UpdateEntityByUID failed. Got an empty UID in %v", updatedObject)
 	}
 
-	collection, err := client.getCollectionData(updatedObject)
+	collection, err := client.GetCollection(updatedObject.DatabaseName(), updatedObject.CollectionName())
 	if err != nil {
 		return err
 	}
@@ -245,7 +236,7 @@ func (ms mongoSession) UpdateEntityByUUID(updatedObject DomainEntity) error {
 	return err
 }
 
-func (ms mongoSession) SaveEntityToHistory(entity DomainEntity) error {
+func (ms mongoSession) SaveEntityToHistory(entity datamodel.DomainEntity) error {
 	collection, err := client.getCollectionHistory(entity)
 	if err != nil {
 		return err
@@ -264,13 +255,13 @@ func (ms mongoSession) RemoveOne(coll Collection, selector bson.M) error {
 	return coll.removeOne(context.Background(), selector)
 }
 
-func (ms mongoSession) RemoveEntity(entity DomainEntity) error {
+func (ms mongoSession) RemoveEntity(entity datamodel.DomainEntity) error {
 	err := ms.SaveEntityToHistory(entity)
 	if err != nil {
 		return err
 	}
 
-	collection, err := client.getCollectionData(entity)
+	collection, err := client.GetCollection(entity.DatabaseName(), entity.CollectionName())
 	if err != nil {
 		return err
 	}
@@ -282,11 +273,11 @@ func (ms mongoSession) RemoveEntity(entity DomainEntity) error {
 	return err
 }
 
-func (ms mongoSession) InsertEntity(entity DomainEntity) error {
+func (ms mongoSession) InsertEntity(entity datamodel.DomainEntity) error {
 	if entity.UUID() == "" {
 		return fmt.Errorf("cannot insert an entity with an empty UID. Entity: %v", entity)
 	}
-	collection, err := client.getCollectionData(entity)
+	collection, err := client.GetCollection(entity.DatabaseName(), entity.CollectionName())
 	if err != nil {
 		return err
 	}

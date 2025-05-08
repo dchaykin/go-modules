@@ -73,21 +73,18 @@ func cleanSlice(slice []interface{}) []interface{} {
 	return result
 }
 
-func EnsureUUID(doc map[string]interface{}) error {
-	val := doc["uuid"]
-	uuid := ""
-	if val != nil {
-		uuid = fmt.Sprintf("%v", val)
-		if len(uuid) > 0 && len(uuid) != 32 {
-			log.Info("invalid uuid: %s. A new value will be generated", uuid)
-		} else if len(uuid) == 32 {
-			return nil
-		}
+func EnsureUUID(domainEntity DomainEntity) error {
+	uuid := domainEntity.UUID()
+	if len(uuid) > 0 && len(uuid) != 32 {
+		log.Info("invalid uuid: %s. A new value will be generated", uuid)
+	} else if len(uuid) == 32 {
+		return nil
 	}
+
 	uuid, err := GenerateUUID()
 	if err != nil {
 		return fmt.Errorf("could not generate a uuid: %v", err)
 	}
-	doc["uuid"] = uuid
+	domainEntity.SetUUID(uuid)
 	return nil
 }

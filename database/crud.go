@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/dchaykin/go-modules/datamodel"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -14,13 +15,13 @@ type Collection interface {
 	insertOne(ctx context.Context, record interface{}) error
 	replaceOne(ctx context.Context, filter bson.M, replacement interface{}, allowInsert bool) error
 
-	updateEntity(ctx context.Context, doc DomainEntity) error
+	updateEntity(ctx context.Context, doc datamodel.DomainEntity) error
 	updateOne(ctx context.Context, filter bson.M, doc interface{}) error
 
 	aggregate(ctx context.Context, match, group bson.M, result interface{}) error
 
 	findOne(ctx context.Context, filter bson.M, doc interface{}) (bool, error)
-	findEntity(ctx context.Context, filter bson.M, doc DomainEntity) (bool, error)
+	findEntity(ctx context.Context, filter bson.M, doc datamodel.DomainEntity) (bool, error)
 	findMany(ctx context.Context, filter bson.M, docList interface{}) error
 	findWithOptions(ctx context.Context, filter bson.M, result interface{}, sort bson.D, offset, limit int64) error
 
@@ -89,7 +90,7 @@ func (c mongoCollection) insertOne(ctx context.Context, record interface{}) erro
 	return nil
 }
 
-func (c mongoCollection) updateEntity(ctx context.Context, doc DomainEntity) error {
+func (c mongoCollection) updateEntity(ctx context.Context, doc datamodel.DomainEntity) error {
 	_, err := c.collection.UpdateOne(ctx, bson.M{"uuid": doc.UUID()}, bson.M{"$set": doc})
 	if err != nil {
 		return err
@@ -112,7 +113,7 @@ func (c mongoCollection) removeMany(ctx context.Context, filter bson.M) error {
 	return nil
 }
 
-func (c mongoCollection) findEntity(ctx context.Context, filter bson.M, doc DomainEntity) (found bool, err error) {
+func (c mongoCollection) findEntity(ctx context.Context, filter bson.M, doc datamodel.DomainEntity) (found bool, err error) {
 	result := c.collection.FindOne(ctx, filter)
 	if err = result.Err(); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
@@ -245,17 +246,17 @@ func (ms mongoSession) GetDatabase(name string) *mongo.Database {
 	return cli.DB(name)
 }
 
-func (ms mongoSession) ReplaceEntityByUUID(doc DomainEntity, allowInsert bool) error {
+func (ms mongoSession) ReplaceEntityByUUID(doc datamodel.DomainEntity, allowInsert bool) error {
 	if doc.UUID() == "" {
 		return fmt.Errorf("could not upsert an entity: no uuid has been set")
 	}
-	coll := ms.GetCollection(doc.DatabaseName(), schemaData)
+	coll := ms.GetCollection(doc.DatabaseName(), doc.CollectionName())
 	return mongo.WithSession(context.Background(), ms.session, func(sc mongo.SessionContext) error {
 		return coll.replaceOne(sc, bson.M{"uuid": doc.UUID()}, doc, allowInsert)
 	})
 }
 
-func (ms mongoSession) FindEntity(coll Collection, filter bson.M, doc DomainEntity) (found bool, err error) {
+func (ms mongoSession) FindEntity(coll Collection, filter bson.M, doc datamodel.DomainEntity) (found bool, err error) {
 	err = mongo.WithSession(context.Background(), ms.session, func(sc mongo.SessionContext) error {
 		found, err = coll.findEntity(sc, filter, doc)
 		return err

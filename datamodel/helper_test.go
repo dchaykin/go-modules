@@ -6,22 +6,43 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+type testDomainEntity struct {
+	ID   string
+	Data map[string]interface{}
+}
+
+func (de testDomainEntity) UUID() string {
+	return de.ID
+}
+
+func (de *testDomainEntity) SetUUID(uuid string) {
+	de.ID = uuid
+}
+
+func (de testDomainEntity) DatabaseName() string {
+	return "test"
+}
+
+func (de testDomainEntity) CollectionName() string {
+	return "test"
+}
+
 func TestEnsureUUID(t *testing.T) {
-	doc := map[string]interface{}{}
+	doc := testDomainEntity{}
 
-	err := EnsureUUID(doc)
+	err := EnsureUUID(&doc)
 	require.NoError(t, err)
-	require.EqualValues(t, 32, len(doc["uuid"].(string)))
+	require.EqualValues(t, 32, len(doc.UUID()))
 
-	doc["uuid"] = "invalid-uuid"
-	err = EnsureUUID(doc)
+	doc.SetUUID("invalid-uuid")
+	err = EnsureUUID(&doc)
 	require.NoError(t, err)
-	require.EqualValues(t, 32, len(doc["uuid"].(string)))
+	require.EqualValues(t, 32, len(doc.UUID()))
 
 	uuid, err := GenerateUUID()
-	doc["uuid"] = uuid
+	doc.SetUUID(uuid)
 	require.NoError(t, err)
-	err = EnsureUUID(doc)
+	err = EnsureUUID(&doc)
 	require.NoError(t, err)
-	require.EqualValues(t, uuid, doc["uuid"].(string))
+	require.EqualValues(t, uuid, doc.UUID())
 }
