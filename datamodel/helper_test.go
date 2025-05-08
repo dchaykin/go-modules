@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/dchaykin/go-modules/auth"
 	"github.com/stretchr/testify/require"
 )
 
@@ -50,6 +51,10 @@ func (de testDomainEntity) ValueDate(fieldName string) *time.Time {
 
 func (de testDomainEntity) ValueBool(fieldName string) bool {
 	return false
+}
+
+func (de *testDomainEntity) SetMetaData(userIdentity auth.UserIdentity, userRole string) {
+
 }
 
 func TestEnsureUUID(t *testing.T) {

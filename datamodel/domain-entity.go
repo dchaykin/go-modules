@@ -1,6 +1,10 @@
 package datamodel
 
-import "time"
+import (
+	"time"
+
+	"github.com/dchaykin/go-modules/auth"
+)
 
 type DomainEntity interface {
 	UUID() string
@@ -8,6 +12,7 @@ type DomainEntity interface {
 	DatabaseName() string
 	CollectionName() string
 	Entity() map[string]interface{}
+	SetMetaData(userIdentity auth.UserIdentity, userRole string)
 
 	ValueString(fieldName string) string
 	ValueInt(fieldName string) int
