@@ -12,10 +12,11 @@ type Combobox struct {
 }
 
 type TenantCombobox struct {
-	Translate    *bool      `json:"translate,omitempty"`
-	Content      []Combobox `json:"content"`
-	Source       *string    `json:"source,omitempty"`
-	NameInSource *string    `json:"name,omitempty"`
+	Translate *bool      `json:"translate,omitempty"`
+	Content   []Combobox `json:"content"`
+	Source    *string    `json:"source,omitempty"`
+	Name      string     `json:"name"`
+	Type      *string    `json:"type,omitempty"`
 }
 
 type TenantComboboxList map[string]TenantCombobox

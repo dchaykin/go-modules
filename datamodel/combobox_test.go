@@ -9,7 +9,7 @@ import (
 func TestLoadTenantCombobox(t *testing.T) {
 	path := GetConfigPath("../assets/config", "default", 1)
 
-	tcl, err := loadTenantComboboxList(path, "combobox-prototype.json", 1)
+	tcl, err := loadTenantComboboxList(path, "combobox.json", 1)
 	require.NoError(t, err)
 
 	require.Exactly(t, 2, len(*tcl))
@@ -19,7 +19,7 @@ func TestLoadTenantCombobox(t *testing.T) {
 	require.Equal(t, true, ok)
 	require.NotNil(t, merchandiser)
 	require.Equal(t, "config", *merchandiser.Source)
-	require.Equal(t, "merchandiser", *merchandiser.NameInSource)
+	require.Equal(t, "merchandiser", merchandiser.Name)
 
 	team, ok := (*tcl)["inquiry"]["team"]
 	require.Equal(t, true, ok)
