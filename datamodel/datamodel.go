@@ -32,6 +32,7 @@ func (cfs *CustomFields) SetValue(fieldName string, value interface{}) {
 type FieldConfig struct {
 	Mandatory *bool   `json:"mandatory,omitempty"`
 	Readonly  *bool   `json:"readonly,omitempty"`
+	Masked    *bool   `json:"masked,omitempty"`
 	Command   *string `json:"command,omitempty"`
 }
 
@@ -47,6 +48,13 @@ func (fc FieldConfig) isReadonly() bool {
 		return false
 	}
 	return *fc.Readonly
+}
+
+func (fc FieldConfig) isMasked() bool {
+	if fc.Masked == nil {
+		return false
+	}
+	return *fc.Masked
 }
 
 func (fc FieldConfig) getCommand() string {
@@ -110,6 +118,13 @@ func (cf *CustomField) setReadonly(readOnly bool) {
 	}
 }
 
+func (cf *CustomField) setMasked(isMasked bool) {
+	(*cf)["masked"] = nil
+	if isMasked {
+		(*cf)["masked"] = &isMasked
+	}
+}
+
 func (cf *CustomField) setCommand(command string) {
 	(*cf)["command"] = nil
 	if command != "" {
@@ -127,6 +142,14 @@ func (cf CustomField) IsMandatory() bool {
 
 func (cf CustomField) IsReadonly() bool {
 	result, ok := cf["readonly"]
+	if !ok || result == nil {
+		return false
+	}
+	return *result.(*bool)
+}
+
+func (cf CustomField) IsMasked() bool {
+	result, ok := cf["masked"]
 	if !ok || result == nil {
 		return false
 	}
@@ -182,6 +205,7 @@ func LoadDataModel(path string, role string) (*TenantConfig, error) {
 			}
 			field.setMandatory(fieldConfig.isMandatory())
 			field.setReadonly(fieldConfig.isReadonly())
+			field.setMasked(fieldConfig.isMasked())
 			field.setCommand(fieldConfig.getCommand())
 		}
 	}
