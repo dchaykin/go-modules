@@ -16,6 +16,7 @@ type UserIdentity interface {
 	SurName() string
 	Email() string
 	Username() string
+	IsAdmin() bool
 }
 
 type userToken struct {
@@ -47,6 +48,15 @@ func (j userToken) FirstName() string {
 		return ""
 	}
 	return claim.(string)
+}
+
+func (j userToken) IsAdmin() bool {
+	claim, ok := j.Claims["admin"]
+	if !ok {
+		log.Warn("Claim 'admin' not found")
+		return false
+	}
+	return claim.(bool)
 }
 
 func (j userToken) SurName() string {
