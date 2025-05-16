@@ -104,6 +104,13 @@ func (tc TenantConfig) GetPrefix(key string) string {
 
 type CustomField map[string]interface{}
 
+func (cf CustomField) Type() string {
+	if cf["type"] == nil {
+		return FieldTypeString
+	}
+	return fmt.Sprintf("%s", cf["type"])
+}
+
 func (cf *CustomField) setMandatory(mandatory bool) {
 	(*cf)["mandatory"] = nil
 	if mandatory {
