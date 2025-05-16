@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/dchaykin/go-modules/log"
 	"github.com/golang-jwt/jwt/v4"
@@ -17,6 +18,7 @@ type UserIdentity interface {
 	Email() string
 	Username() string
 	IsAdmin() bool
+	Set(req *http.Request) error
 }
 
 type userToken struct {
@@ -94,6 +96,15 @@ func GetUserIdentityFromRequest(r http.Request) (UserIdentity, error) {
 	ui := userToken{}
 	err := json.Unmarshal([]byte(userInfo), &ui)
 	return ui, err
+}
+
+func (j userToken) Set(req *http.Request) error {
+	authorization, err := CreateAuthorizationToken(j.Claims, os.Getenv("AUTH_SECRET"))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Authorization", "Bearer "+string(authorization))
+	return nil
 }
 
 func GetUserIdentity(authorization, secret string) (UserIdentity, error) {

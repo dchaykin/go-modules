@@ -94,3 +94,17 @@ func (resp ServiceResponse) GetPayload() ([]byte, error) {
 	}
 	return buf.Bytes(), nil
 }
+
+func FetchServiceResponse(response []byte) (ServiceResponse, error) {
+	if response == nil {
+		return ServiceResponse{}, fmt.Errorf("empty response")
+	}
+	return unmarschalResponse(response)
+}
+
+func unmarschalResponse(response []byte) (sr ServiceResponse, err error) {
+	if err = json.Unmarshal(response, &sr); err != nil {
+		return sr, err
+	}
+	return sr, nil
+}
