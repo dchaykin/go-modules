@@ -6,17 +6,33 @@ import (
 	"os"
 )
 
+type ComboboxType string
+
+const (
+	ComboboxTypeUnknown = ""
+	ComboboxTypeStatic  = "static"
+	ComboboxTypeApi     = "api"
+	ComboboxTypeSelf    = "self"
+)
+
 type Combobox struct {
 	ID    string `json:"id"`
 	Value string `json:"value"`
 }
 
 type TenantCombobox struct {
-	Translate *bool      `json:"translate,omitempty"`
-	Content   []Combobox `json:"content"`
-	Source    *string    `json:"source,omitempty"`
-	Name      string     `json:"name"`
-	Type      *string    `json:"type,omitempty"`
+	Translate *bool         `json:"translate,omitempty"`
+	Content   []Combobox    `json:"content"`
+	Source    *string       `json:"source,omitempty"`
+	Name      string        `json:"name"`
+	Type      *ComboboxType `json:"type,omitempty"`
+}
+
+func (tc TenantCombobox) GetType() ComboboxType {
+	if tc.Type == nil {
+		return ComboboxTypeStatic
+	}
+	return *tc.Type
 }
 
 type TenantComboboxList map[string]TenantCombobox
