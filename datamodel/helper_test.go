@@ -57,6 +57,10 @@ func (de *testDomainEntity) SetMetaData(userIdentity auth.UserIdentity, userRole
 
 }
 
+func (de *testDomainEntity) GetAccessConfig() []AccessConfig {
+	return nil
+}
+
 func TestEnsureUUID(t *testing.T) {
 	doc := testDomainEntity{}
 

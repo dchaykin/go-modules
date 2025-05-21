@@ -13,6 +13,7 @@ type DomainEntity interface {
 	CollectionName() string
 	Entity() map[string]interface{}
 	SetMetaData(userIdentity auth.UserIdentity, userRole string)
+	GetAccessConfig() []AccessConfig
 
 	ValueString(fieldName string) string
 	ValueInt(fieldName string) int
