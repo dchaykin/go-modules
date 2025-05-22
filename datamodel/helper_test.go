@@ -29,7 +29,7 @@ func (de testDomainEntity) CollectionName() string {
 	return "test"
 }
 
-func (de testDomainEntity) Entity() map[string]interface{} {
+func (de testDomainEntity) Entity() map[string]any {
 	return de.Data
 }
 
@@ -58,6 +58,10 @@ func (de *testDomainEntity) SetMetaData(userIdentity auth.UserIdentity, userRole
 }
 
 func (de *testDomainEntity) GetAccessConfig() []AccessConfig {
+	return nil
+}
+
+func (de testDomainEntity) OverviewRow() map[string]any {
 	return nil
 }
 

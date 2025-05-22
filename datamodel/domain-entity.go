@@ -12,6 +12,7 @@ type DomainEntity interface {
 	DatabaseName() string
 	CollectionName() string
 	Entity() map[string]any
+	OverviewRow() map[string]any
 	SetMetaData(userIdentity auth.UserIdentity, userRole string)
 	GetAccessConfig() []AccessConfig
 
