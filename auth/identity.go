@@ -18,6 +18,7 @@ type UserIdentity interface {
 	Email() string
 	Username() string
 	IsAdmin() bool
+	IsDeveloper() bool
 	Set(req *http.Request) error
 }
 
@@ -55,7 +56,17 @@ func (j userToken) FirstName() string {
 func (j userToken) IsAdmin() bool {
 	claim, ok := j.Claims["admin"]
 	if !ok {
-		log.Warn("Claim 'admin' not found")
+		return false
+	}
+	return claim.(bool)
+}
+
+func (j userToken) IsDeveloper() bool {
+	if j.Username() == "dchaykin" { // TODO
+		return true
+	}
+	claim, ok := j.Claims["developer"]
+	if !ok {
 		return false
 	}
 	return claim.(bool)

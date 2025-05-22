@@ -2,6 +2,7 @@ package apis
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -37,24 +38,28 @@ func CorsMiddleware(next http.Handler) http.Handler {
 
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get("Authorization")
-		if token != "" {
-			token := strings.TrimPrefix(token, "Bearer ")
-			user, err := auth.GetUserIdentity(token, os.Getenv("AUTH_SECRET"))
+		userIdentity, err := getUserIdentityFromToken(r.Header.Get("Authorization"))
+		if err != nil {
+			log.Info("Invalid user token: %v", err)
+		} else {
+			userData, err := json.Marshal(userIdentity)
 			if err != nil {
-				log.Info("Invalid user token: %v", err)
-			} else {
-				userData, err := json.Marshal(user)
-				if err != nil {
-					log.Info("Invalid user structure: %v", err)
-					return
-				}
-				reqClone := r.Clone(r.Context())
-				reqClone.Header.Set("X-User-Info", string(userData))
-				next.ServeHTTP(w, reqClone)
+				log.Info("Invalid user structure: %v", err)
 				return
 			}
+			reqClone := r.Clone(r.Context())
+			reqClone.Header.Set("X-User-Info", string(userData))
+			next.ServeHTTP(w, reqClone)
+			return
 		}
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		http.Error(w, fmt.Sprintf("%v", err), http.StatusUnauthorized)
 	})
+}
+
+func getUserIdentityFromToken(token string) (auth.UserIdentity, error) {
+	if token != "" {
+		token := strings.TrimPrefix(token, "Bearer ")
+		return auth.GetUserIdentity(token, os.Getenv("AUTH_SECRET"))
+	}
+	return nil, fmt.Errorf("no token found")
 }
