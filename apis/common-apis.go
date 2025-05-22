@@ -19,7 +19,7 @@ func AddStandardEndpoints(router *mux.Router) {
 }
 
 func AddAdminEndpoints(router *mux.Router) {
-	router.HandleFunc("/admin/log", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/log", func(w http.ResponseWriter, r *http.Request) {
 		userIdentity, err := getUserIdentityFromToken(r.Header.Get("Authorization"))
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
