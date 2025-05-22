@@ -24,20 +24,20 @@ func LoadAccessData(fileName string) {
 	}
 }
 
-func CleanNil(data map[string]interface{}) map[string]interface{} {
-	cleaned := make(map[string]interface{})
+func CleanNil(data map[string]any) map[string]any {
+	cleaned := make(map[string]any)
 	for k, v := range data {
 		if v == nil {
 			continue
 		}
 
 		switch val := v.(type) {
-		case map[string]interface{}:
+		case map[string]any:
 			nested := CleanNil(val)
 			if len(nested) > 0 {
 				cleaned[k] = nested
 			}
-		case []interface{}:
+		case []any:
 			cleanedSlice := cleanSlice(val)
 			if len(cleanedSlice) > 0 {
 				cleaned[k] = cleanedSlice
@@ -49,19 +49,19 @@ func CleanNil(data map[string]interface{}) map[string]interface{} {
 	return cleaned
 }
 
-func cleanSlice(slice []interface{}) []interface{} {
-	result := make([]interface{}, 0, len(slice))
+func cleanSlice(slice []any) []any {
+	result := make([]any, 0, len(slice))
 	for _, v := range slice {
 		if v == nil {
 			continue
 		}
 		switch val := v.(type) {
-		case map[string]interface{}:
+		case map[string]any:
 			cleaned := CleanNil(val)
 			if len(cleaned) > 0 {
 				result = append(result, cleaned)
 			}
-		case []interface{}:
+		case []any:
 			nested := cleanSlice(val)
 			if len(nested) > 0 {
 				result = append(result, nested)

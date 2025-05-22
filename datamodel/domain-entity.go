@@ -11,7 +11,7 @@ type DomainEntity interface {
 	SetUUID(uuid string)
 	DatabaseName() string
 	CollectionName() string
-	Entity() map[string]interface{}
+	Entity() map[string]any
 	SetMetaData(userIdentity auth.UserIdentity, userRole string)
 	GetAccessConfig() []AccessConfig
 

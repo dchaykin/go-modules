@@ -22,7 +22,7 @@ const (
 
 type CustomFields map[string]CustomField
 
-func (cfs *CustomFields) SetValue(fieldName string, value interface{}) {
+func (cfs *CustomFields) SetValue(fieldName string, value any) {
 	if (*cfs)[fieldName] == nil {
 		(*cfs)[fieldName] = CustomField{}
 	}
@@ -102,7 +102,7 @@ func (tc TenantConfig) GetPrefix(key string) string {
 	return ""
 }
 
-type CustomField map[string]interface{}
+type CustomField map[string]any
 
 func (cf CustomField) Type() string {
 	if cf["type"] == nil {

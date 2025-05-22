@@ -18,8 +18,8 @@ type Metadata struct {
 }
 
 type Record struct {
-	Metadata Metadata               `bson:"metadata"`
-	Fields   map[string]interface{} `json:"entity" bson:"entity"`
+	Metadata Metadata       `bson:"metadata"`
+	Fields   map[string]any `json:"entity" bson:"entity"`
 }
 
 func (r *Record) SetMetaData(userIdentity auth.UserIdentity, userRole string) {
@@ -27,6 +27,67 @@ func (r *Record) SetMetaData(userIdentity auth.UserIdentity, userRole string) {
 	r.Metadata.Partner = userIdentity.Partner()
 	r.Metadata.Role = userIdentity.Role(userRole)
 	r.Metadata.User = userIdentity.Username()
+}
+
+type OnJsonArrayFound func(array []any)
+
+func (r *Record) FindJsonArray(jsonPath []string, f OnJsonArrayFound) {
+	r.findJsonArray(r.Fields, jsonPath, f)
+}
+
+func (r *Record) findJsonArray(node map[string]any, jsonPath []string, f OnJsonArrayFound) {
+	if len(jsonPath) == 0 {
+		return
+	}
+	lookedNodeName := jsonPath[0]
+	for k := range node {
+		if k == lookedNodeName {
+			switch vTyped := node[k].(type) {
+			case []any:
+				f(vTyped)
+				return
+			case map[string]any:
+				r.findJsonArray(vTyped, jsonPath[1:], f)
+			}
+		}
+	}
+}
+
+type OnJsonFieldFound func(field map[string]any, name string)
+
+func (r *Record) FindJsonField(jsonPath []string, f OnJsonFieldFound) {
+	r.findJsonField(r.Fields, jsonPath, f)
+}
+
+func (r *Record) findJsonField(node map[string]any, jsonPath []string, f OnJsonFieldFound) {
+	if len(jsonPath) == 0 {
+		return
+	}
+	lookedNodeName := jsonPath[0]
+	for k, v := range node {
+		if k == lookedNodeName {
+			switch vTyped := v.(type) {
+			case nil:
+				if len(jsonPath) == 1 {
+					f(node, k)
+				}
+			case []any:
+				for i := range vTyped {
+					if vTyped[i] == nil {
+						continue
+					}
+					r.findJsonField(vTyped[i].(map[string]any), jsonPath[1:], f)
+				}
+				return
+			case map[string]any:
+				r.findJsonField(node[k].(map[string]any), jsonPath[1:], f)
+			case any:
+				if len(jsonPath) == 1 {
+					f(node, k)
+				}
+			}
+		}
+	}
 }
 
 func (r Record) UUID() string {
@@ -40,7 +101,7 @@ func (r *Record) SetUUID(UUID string) {
 	r.Fields["uuid"] = UUID
 }
 
-func (r Record) Entity() map[string]interface{} {
+func (r Record) Entity() map[string]any {
 	return r.Fields
 }
 
