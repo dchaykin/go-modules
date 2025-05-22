@@ -160,7 +160,7 @@ func (cf CustomField) IsMasked() bool {
 	if !ok || result == nil {
 		return false
 	}
-	return *result.(*bool)
+	return result.(bool)
 }
 
 func loadDataModel(path string) (*TenantConfig, error) {
