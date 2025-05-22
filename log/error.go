@@ -16,6 +16,9 @@ func (e *errorWithPos) Error() string {
 }
 
 func WrapError(err error) error {
+	if err == nil {
+		return nil
+	}
 	_, file, line, _ := runtime.Caller(1)
 	return &errorWithPos{File: file, Line: line, Err: err}
 }
