@@ -1,12 +1,32 @@
 package datamodel
 
 import (
+	"encoding/json"
+	"reflect"
 	"testing"
 	"time"
 
 	"github.com/dchaykin/go-modules/auth"
+	"github.com/dchaykin/go-modules/datamodel"
 	"github.com/stretchr/testify/require"
 )
+
+const testJsonRecord = `{
+			"metadata": {},
+			"entity": {
+				"foo": {
+					"boz": 234,
+					"bar": [
+						{ "baz": 1 },
+						{ "baz": 2 },
+						null
+					],
+					"foz": 123,
+					"emptyf": null,
+					"emptyl": []
+				}
+			}
+		}`
 
 type testDomainEntity struct {
 	ID   string
@@ -57,7 +77,7 @@ func (de *testDomainEntity) SetMetaData(userIdentity auth.UserIdentity, userRole
 
 }
 
-func (de *testDomainEntity) GetAccessConfig() []AccessConfig {
+func (de *testDomainEntity) GetAccessConfig() []datamodel.AccessConfig {
 	return nil
 }
 
@@ -77,10 +97,24 @@ func TestEnsureUUID(t *testing.T) {
 	require.NoError(t, err)
 	require.EqualValues(t, 32, len(doc.UUID()))
 
-	uuid, err := GenerateUUID()
+	uuid, err := datamodel.GenerateUUID()
 	doc.SetUUID(uuid)
 	require.NoError(t, err)
 	err = EnsureUUID(&doc)
 	require.NoError(t, err)
 	require.EqualValues(t, uuid, doc.UUID())
+}
+
+func TestCleanNil(t *testing.T) {
+	rec := datamodel.Record{}
+	err := json.Unmarshal([]byte(testJsonRecord), &rec)
+	require.NoError(t, err)
+
+	rec.Fields = CleanNil(rec.Fields)
+
+	expected := map[string]any{}
+	err = json.Unmarshal([]byte(`{"foo":{"boz":234,"bar":[{"baz":1},{"baz":2}],"foz":123}}`), &expected)
+	require.NoError(t, err)
+
+	require.EqualValues(t, true, reflect.DeepEqual(expected, rec.Fields))
 }

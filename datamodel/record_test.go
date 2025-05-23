@@ -106,17 +106,3 @@ func TestFindJsonField_NotFound(t *testing.T) {
 		require.EqualValues(t, called, false)
 	}
 }
-
-func TestCleanNil(t *testing.T) {
-	rec := Record{}
-	err := json.Unmarshal([]byte(testJsonRecord), &rec)
-	require.NoError(t, err)
-
-	rec.Fields = CleanNil(rec.Fields)
-
-	expected := map[string]any{}
-	err = json.Unmarshal([]byte(`{"foo":{"boz":234,"bar":[{"baz":1},{"baz":2}],"foz":123}}`), &expected)
-	require.NoError(t, err)
-
-	require.EqualValues(t, true, reflect.DeepEqual(expected, rec.Fields))
-}

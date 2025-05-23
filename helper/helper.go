@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/dchaykin/go-modules/datamodel"
 	"github.com/dchaykin/go-modules/log"
 )
 
@@ -73,7 +74,7 @@ func cleanSlice(slice []any) []any {
 	return result
 }
 
-func EnsureUUID(domainEntity DomainEntity) error {
+func EnsureUUID(domainEntity datamodel.DomainEntity) error {
 	uuid := domainEntity.UUID()
 	if len(uuid) > 0 && len(uuid) != 32 {
 		log.Info("invalid uuid: %s. A new value will be generated", uuid)
@@ -81,7 +82,7 @@ func EnsureUUID(domainEntity DomainEntity) error {
 		return nil
 	}
 
-	uuid, err := GenerateUUID()
+	uuid, err := datamodel.GenerateUUID()
 	if err != nil {
 		return fmt.Errorf("could not generate a uuid: %v", err)
 	}
