@@ -13,15 +13,15 @@ import (
 	"github.com/dchaykin/go-modules/log"
 )
 
-func createOverviewConfig(userIdentity auth.UserIdentity, path, serviceURL, name string) (string, error) {
+func createOverviewConfig(userIdentity auth.UserIdentity, path, name string, actions []OverviewAction) (string, error) {
 	tc, err := datamodel.LoadDataModel(path)
 	if err != nil {
 		return "", err
 	}
 
 	subjectConfig := SubjectConfig{
-		ServiceURL: serviceURL,
 		Name:       name,
+		ActionList: actions,
 		Fields:     map[string]datamodel.CustomField{},
 	}
 	for fieldName, customField := range tc.DataModel[name] {
@@ -93,7 +93,7 @@ func PrepareOverviewCommand(w http.ResponseWriter, r *http.Request) (auth.UserId
 
 func PerformOverviewCommand(userIdentity auth.UserIdentity, overviewCommand OverviewCommand, configPath string) (string, error) {
 	if overviewCommand.CreateTable != nil && *(overviewCommand.CreateTable) {
-		return createOverviewConfig(userIdentity, configPath, overviewCommand.ServiceUrl, overviewCommand.Subject)
+		return createOverviewConfig(userIdentity, configPath, overviewCommand.Subject, overviewCommand.ActionList)
 	}
 	if overviewCommand.FillComboboxes != nil && *(overviewCommand.FillComboboxes) {
 		err := createComboboxes(userIdentity, configPath, overviewCommand.Subject)
