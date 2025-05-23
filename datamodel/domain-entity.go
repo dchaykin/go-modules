@@ -1,6 +1,8 @@
 package datamodel
 
 import (
+	"slices"
+	"strings"
 	"time"
 
 	"github.com/dchaykin/go-modules/auth"
@@ -23,16 +25,28 @@ type DomainEntity interface {
 	ValueBool(fieldName string) bool
 }
 
-type DomainItem struct {
-	record map[string]any
+type DomainItemList []any
+
+func (l DomainItemList) UniqueKeyList(fieldName string, separator string) string {
+	return l.UniqueKeysList([]string{fieldName}, "", separator)
 }
 
-func (item *DomainItem) Set(data map[string]any) {
-	item.record = data
+func (l DomainItemList) UniqueKeysList(fieldNames []string, fieldSeparator, itemSeparator string) string {
+	result := []string{}
+	for _, v := range l {
+		if v == nil {
+			continue
+		}
+		item := DomainItem(v.(map[string]any))
+		result = append(result, item.Uniques(fieldNames, fieldSeparator))
+	}
+	return strings.Join(result, itemSeparator)
 }
+
+type DomainItem map[string]any
 
 func (item DomainItem) AsBool(fieldName string, defaultValue bool) bool {
-	value, ok := item.record[fieldName]
+	value, ok := item[fieldName]
 	if !ok || value == nil {
 		return defaultValue
 	}
@@ -40,7 +54,7 @@ func (item DomainItem) AsBool(fieldName string, defaultValue bool) bool {
 }
 
 func (item DomainItem) AsString(fieldName string, defaultValue string) string {
-	value, ok := item.record[fieldName]
+	value, ok := item[fieldName]
 	if !ok || value == nil {
 		return defaultValue
 	}
@@ -48,9 +62,25 @@ func (item DomainItem) AsString(fieldName string, defaultValue string) string {
 }
 
 func (item DomainItem) AsInt(fieldName string, defaultValue int) int {
-	value, ok := item.record[fieldName]
+	value, ok := item[fieldName]
 	if !ok || value == nil {
 		return defaultValue
 	}
 	return value.(int)
+}
+
+func (item DomainItem) Uniques(fieldNames []string, separator string) string {
+	result := []string{}
+	for _, fieldName := range fieldNames {
+		value := item.AsString(fieldName, "")
+		if value == "" || slices.Contains(result, value) {
+			continue
+		}
+		result = append(result, value)
+	}
+	return strings.Join(result, separator)
+}
+
+func (item DomainItem) Unique(fieldName string) string {
+	return item.Uniques([]string{fieldName}, "")
 }
