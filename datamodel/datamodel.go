@@ -9,6 +9,7 @@ import (
 
 const (
 	FieldTypeInt      = "int"
+	FieldTypeUint     = "uint"
 	FieldTypeString   = "string"
 	FieldTypeFloat    = "float"
 	FieldTypeDate     = "date"
