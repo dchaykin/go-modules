@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 	"runtime"
+	"strings"
 )
 
 const (
@@ -54,5 +55,9 @@ func Info(msg string, args ...any) {
 func Error(msg string, args ...any) {
 	buf := make([]byte, 1024)
 	runtime.Stack(buf, false)
-	logger.Error(fmt.Sprintf(msg, args...), "Stacktrace", string(buf))
+	logger.Error(fmt.Sprintf(msg, args...))
+	parts := strings.Split(string(buf), "\n")
+	for i, part := range parts {
+		logger.Error("Stacktrace", fmt.Sprintf("%d", i), part)
+	}
 }
