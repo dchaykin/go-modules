@@ -14,6 +14,9 @@ type DataRecord struct {
 }
 
 type OverviewCommand struct {
+	Subject    string `json:"-"`
+	ServiceUrl string `json:"-"`
+
 	CreateTable    *bool   `json:"createTable,omitempty"`
 	FillData       *bool   `json:"fillData,omitempty"`
 	FillComboboxes *bool   `json:"fillComboboxes,omitempty"`

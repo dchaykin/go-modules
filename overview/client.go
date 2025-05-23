@@ -3,6 +3,7 @@ package overview
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 
@@ -12,7 +13,7 @@ import (
 	"github.com/dchaykin/go-modules/log"
 )
 
-func CreateOverviewConfig(userIdentity auth.UserIdentity, path, serviceURL, name string) (string, error) {
+func createOverviewConfig(userIdentity auth.UserIdentity, path, serviceURL, name string) (string, error) {
 	tc, err := datamodel.LoadDataModel(path)
 	if err != nil {
 		return "", err
@@ -59,4 +60,47 @@ func UpdateOverviewRow(userIdentity auth.UserIdentity, domainEntity datamodel.Do
 	}
 
 	return nil
+}
+
+func PrepareOverviewCommand(w http.ResponseWriter, r *http.Request) (auth.UserIdentity, *OverviewCommand) {
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		httpcomm.SetResponseError(&w, "Unable to fetch payload from body", err, http.StatusBadRequest)
+		return nil, nil
+	}
+	defer r.Body.Close()
+
+	userIdentity, err := auth.GetUserIdentityFromRequest(*r)
+	if err != nil {
+		httpcomm.SetResponseError(&w, "", err, http.StatusUnauthorized)
+		return nil, nil
+	}
+
+	if !userIdentity.IsAdmin() {
+		httpcomm.SetResponseError(&w, "permission denied", nil, http.StatusForbidden)
+		return nil, nil
+	}
+
+	overviewCommand := OverviewCommand{}
+	err = json.Unmarshal(body, &overviewCommand)
+	if err != nil {
+		httpcomm.SetResponseError(&w, "Unable to unmarshal payload", err, http.StatusBadRequest)
+		return nil, nil
+	}
+
+	return userIdentity, &overviewCommand
+}
+
+func PerformOverviewCommand(userIdentity auth.UserIdentity, overviewCommand OverviewCommand, configPath string) (string, error) {
+	if overviewCommand.CreateTable != nil && *(overviewCommand.CreateTable) {
+		return createOverviewConfig(userIdentity, configPath, overviewCommand.ServiceUrl, overviewCommand.Subject)
+	}
+	if overviewCommand.FillComboboxes != nil && *(overviewCommand.FillComboboxes) {
+		err := createComboboxes(userIdentity, configPath, overviewCommand.Subject)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return "no action", nil
 }

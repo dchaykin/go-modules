@@ -12,7 +12,7 @@ import (
 	"github.com/dchaykin/go-modules/log"
 )
 
-func CreateComboboxes(userIdentity auth.UserIdentity, path, overviewName string) error {
+func createComboboxes(userIdentity auth.UserIdentity, path, overviewName string) error {
 	tc, err := datamodel.LoadDataModel(path)
 	if err != nil {
 		return log.WrapError(err)
@@ -30,7 +30,7 @@ func CreateComboboxes(userIdentity auth.UserIdentity, path, overviewName string)
 				continue
 			}
 			for _, cmb := range rootNode {
-				if err = CreateCombobox(userIdentity, overviewName, fieldName, cmb); err != nil {
+				if err = createCombobox(userIdentity, overviewName, fieldName, cmb); err != nil {
 					return log.WrapError(err)
 				}
 			}
@@ -40,7 +40,7 @@ func CreateComboboxes(userIdentity auth.UserIdentity, path, overviewName string)
 	return nil
 }
 
-func CreateCombobox(userIdentity auth.UserIdentity, overviewName, fieldName string, cmb datamodel.TenantCombobox) error {
+func createCombobox(userIdentity auth.UserIdentity, overviewName, fieldName string, cmb datamodel.TenantCombobox) error {
 	data, err := json.Marshal(cmb)
 	if err != nil {
 		return log.WrapError(err)
