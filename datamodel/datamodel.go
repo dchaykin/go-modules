@@ -125,13 +125,6 @@ func (cf *CustomField) setReadonly(readOnly bool) {
 	}
 }
 
-func (cf *CustomField) setMasked(isMasked bool) {
-	(*cf)["masked"] = nil
-	if isMasked {
-		(*cf)["masked"] = &isMasked
-	}
-}
-
 func (cf *CustomField) setCommand(command string) {
 	(*cf)["command"] = nil
 	if command != "" {
@@ -163,8 +156,9 @@ func (cf CustomField) IsMasked() bool {
 	return result.(bool)
 }
 
-func loadDataModel(path string) (*TenantConfig, error) {
-	jsonData, err := readDataModel(path)
+func loadDataModelFromFile(path string) (*TenantConfig, error) {
+	fileName := fmt.Sprintf("%s/datamodel.json", path)
+	jsonData, err := os.ReadFile(fileName)
 	if err != nil {
 		return nil, err
 	}
@@ -177,15 +171,34 @@ func loadDataModel(path string) (*TenantConfig, error) {
 }
 
 func ReadPrefix(path, key string) string {
-	tc, err := loadDataModel(path)
+	tc, err := loadDataModelFromFile(path)
 	if err != nil {
 		return ""
 	}
 	return tc.GetPrefix(key)
 }
 
-func LoadDataModel(path string, role string) (*TenantConfig, error) {
-	tc, err := loadDataModel(path)
+func LoadDataModel(path string) (*TenantConfig, error) {
+	tc, err := loadDataModelFromFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	if tc.ComboboxInfo != nil && tc.ComboboxInfo.FileName != "" {
+		tenantCmbs, err := loadTenantComboboxList(path, tc.ComboboxInfo.FileName, tc.ComboboxInfo.Version)
+		if err != nil {
+			return nil, err
+		}
+		tc.Cmbs = tenantCmbs
+	}
+
+	tc.ComboboxInfo = nil
+
+	return tc, nil
+}
+
+func LoadDataModelByRole(path string, role string) (*TenantConfig, error) {
+	tc, err := LoadDataModel(path)
 	if err != nil {
 		return nil, err
 	}
@@ -212,29 +225,13 @@ func LoadDataModel(path string, role string) (*TenantConfig, error) {
 			}
 			field.setMandatory(fieldConfig.isMandatory())
 			field.setReadonly(fieldConfig.isReadonly())
-			field.setMasked(fieldConfig.isMasked())
 			field.setCommand(fieldConfig.getCommand())
 		}
 	}
 
 	tc.Roles = nil
 
-	if tc.ComboboxInfo != nil && tc.ComboboxInfo.FileName != "" {
-		tenantCmbs, err := loadTenantComboboxList(path, tc.ComboboxInfo.FileName, tc.ComboboxInfo.Version)
-		if err != nil {
-			return nil, err
-		}
-		tc.Cmbs = tenantCmbs
-	}
-
-	tc.ComboboxInfo = nil
-
 	return tc, nil
-}
-
-func readDataModel(path string) ([]byte, error) {
-	fileName := fmt.Sprintf("%s/datamodel.json", path)
-	return os.ReadFile(fileName)
 }
 
 func GetConfigPath(basePath, tenant string, version int) string {

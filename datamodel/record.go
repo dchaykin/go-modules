@@ -157,7 +157,7 @@ func GetDomainConfig(r *http.Request, configPath, rootName, userRole string) (*h
 	}
 
 	path := GetConfigPath(configPath, tenant, version)
-	tenantConfig, err := LoadDataModel(path, userIdentity.Role(userRole))
+	tenantConfig, err := LoadDataModelByRole(path, userIdentity.Role(userRole))
 	if err != nil {
 		return GetErrorResponse(err), http.StatusInternalServerError
 	}
