@@ -21,8 +21,7 @@ type DataRecord struct {
 }
 
 type OverviewCommand struct {
-	Subject    string `json:"-"`
-	ServiceUrl string `json:"-"`
+	Subject string `json:"-"`
 
 	CreateTable    *bool            `json:"createTable,omitempty"`
 	ActionList     []OverviewAction `json:"actions,omitempty"`
