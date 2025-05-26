@@ -13,10 +13,10 @@ import (
 	"github.com/dchaykin/go-modules/log"
 )
 
-func createOverviewConfig(userIdentity auth.UserIdentity, path, name string, actions []OverviewAction) (string, error) {
+func createOverviewConfig(userIdentity auth.UserIdentity, path, name string, actions []OverviewAction) error {
 	tc, err := datamodel.LoadDataModel(path)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	subjectConfig := SubjectConfig{
@@ -30,16 +30,17 @@ func createOverviewConfig(userIdentity auth.UserIdentity, path, name string, act
 
 	payload, err := json.Marshal(subjectConfig)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	endpoint := fmt.Sprintf("https://%s/app-overview/api/create/table", os.Getenv("MYHOST"))
 	resp := httpcomm.Post(endpoint, userIdentity, nil, string(payload))
 	if resp.StatusCode != http.StatusOK {
-		return "", resp.GetError()
+		return resp.GetError()
 	}
 
-	return string(resp.Answer), nil
+	log.Info("Overview config for %s created. Response: %s", name, string(resp.Answer))
+	return nil
 }
 
 func UpdateOverviewRow(userIdentity auth.UserIdentity, domainEntity datamodel.DomainEntity) error {
@@ -91,16 +92,19 @@ func PrepareOverviewCommand(w http.ResponseWriter, r *http.Request) (auth.UserId
 	return userIdentity, &overviewCommand
 }
 
-func PerformOverviewCommand(userIdentity auth.UserIdentity, overviewCommand OverviewCommand, configPath string) (string, error) {
+func PerformOverviewCommand(userIdentity auth.UserIdentity, overviewCommand OverviewCommand, configPath string) error {
 	if overviewCommand.CreateTable != nil && *(overviewCommand.CreateTable) {
-		return createOverviewConfig(userIdentity, configPath, overviewCommand.Subject, overviewCommand.ActionList)
+		err := createOverviewConfig(userIdentity, configPath, overviewCommand.Subject, overviewCommand.ActionList)
+		if err != nil {
+			return err
+		}
 	}
 	if overviewCommand.FillComboboxes != nil && *(overviewCommand.FillComboboxes) {
 		err := createComboboxes(userIdentity, configPath, overviewCommand.Subject)
 		if err != nil {
-			return "", err
+			return err
 		}
+		log.Info("Comboboxes for %s overview created", overviewCommand.Subject)
 	}
-
-	return "no action", nil
+	return nil
 }

@@ -3,10 +3,10 @@ package overview
 import "github.com/dchaykin/go-modules/datamodel"
 
 type OverviewAction struct {
-	Command string  `json:"command"`
-	Icon    *string `json:"icon,omitempty"`
-	Link    string  `json:"link"`
-	Field   string  `json:"field"`
+	Command string `json:"command"`
+	Icon    string `json:"icon"`
+	Link    string `json:"link"`
+	Field   string `json:"field"`
 }
 
 type SubjectConfig struct {
