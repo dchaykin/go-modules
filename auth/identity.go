@@ -12,6 +12,7 @@ import (
 
 type UserIdentity interface {
 	Partner() string
+	TenantList() []string
 	Role(name string) string
 	FirstName() string
 	SurName() string
@@ -42,6 +43,15 @@ func (j userToken) Role(name string) string {
 		return ""
 	}
 	return claim.(string)
+}
+
+func (j userToken) TenantList() []string {
+	claim, ok := j.Claims["tenant"]
+	if !ok {
+		log.Warn("No tenant found")
+		return []string{}
+	}
+	return claim.([]string)
 }
 
 func (j userToken) FirstName() string {
