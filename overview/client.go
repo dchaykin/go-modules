@@ -13,33 +13,19 @@ import (
 	"github.com/dchaykin/go-modules/log"
 )
 
-func createOverviewConfig(userIdentity auth.UserIdentity, path, name string, actions []OverviewAction) error {
-	tc, err := datamodel.LoadDataModel(path)
+func ConfigureOverview(userIdentity auth.UserIdentity, tenantConfig datamodel.TenantConfig, tenant string) error {
+	payload, err := json.Marshal(tenantConfig)
 	if err != nil {
 		return err
 	}
 
-	subjectConfig := SubjectConfig{
-		Name:       name,
-		ActionList: actions,
-		Fields:     map[string]datamodel.CustomField{},
-	}
-	for fieldName, customField := range tc.DataModel[name] {
-		subjectConfig.Fields[fieldName] = customField
-	}
-
-	payload, err := json.Marshal(subjectConfig)
-	if err != nil {
-		return err
-	}
-
-	endpoint := fmt.Sprintf("https://%s/app-overview/api/create/table", os.Getenv("MYHOST"))
+	endpoint := fmt.Sprintf("https://%s/app-overview/api/create/overview/%s", os.Getenv("MYHOST"), tenant)
 	resp := httpcomm.Post(endpoint, userIdentity, nil, string(payload))
 	if resp.StatusCode != http.StatusOK {
 		return resp.GetError()
 	}
 
-	log.Info("Overview config for %s created. Response: %s", name, string(resp.Answer))
+	log.Info("Overview %s config for tenant %s created, version %d. Response: %s", tenantConfig.Subject, tenant, tenantConfig.Version, string(resp.Answer))
 	return nil
 }
 
@@ -90,21 +76,4 @@ func PrepareOverviewCommand(w http.ResponseWriter, r *http.Request) (auth.UserId
 	}
 
 	return userIdentity, &overviewCommand
-}
-
-func PerformOverviewCommand(userIdentity auth.UserIdentity, overviewCommand OverviewCommand, configPath string) error {
-	if overviewCommand.CreateTable != nil && *(overviewCommand.CreateTable) {
-		err := createOverviewConfig(userIdentity, configPath, overviewCommand.Subject, overviewCommand.ActionList)
-		if err != nil {
-			return err
-		}
-	}
-	if overviewCommand.FillComboboxes != nil && *(overviewCommand.FillComboboxes) {
-		err := createComboboxes(userIdentity, configPath, overviewCommand.Subject)
-		if err != nil {
-			return err
-		}
-		log.Info("Comboboxes for %s overview created", overviewCommand.Subject)
-	}
-	return nil
 }

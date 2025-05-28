@@ -7,7 +7,7 @@ import (
 )
 
 func TestLoadTenantCombobox(t *testing.T) {
-	path := GetConfigPath("../assets/config", "default", 1)
+	path := "../assets/config/default"
 
 	tcl, err := loadTenantComboboxList(path, "combobox.json", 1)
 	require.NoError(t, err)

@@ -51,13 +51,6 @@ func (fc FieldConfig) isReadonly() bool {
 	return *fc.Readonly
 }
 
-func (fc FieldConfig) isMasked() bool {
-	if fc.Masked == nil {
-		return false
-	}
-	return *fc.Masked
-}
-
 func (fc FieldConfig) getCommand() string {
 	if fc.Command == nil {
 		return ""
@@ -88,6 +81,8 @@ type ComboboxInfo struct {
 }
 
 type TenantConfig struct {
+	Version      int                      `json:"version"`
+	Subject      string                   `json:"subject"`
 	DataModel    map[string]CustomFields  `json:"datamodel"`
 	Roles        *map[string]RoleConfig   `json:"roles,omitempty"`
 	Layout       any                      `json:"layout"`
@@ -157,8 +152,8 @@ func (cf CustomField) IsMasked() bool {
 	return result.(bool)
 }
 
-func loadDataModelFromFile(path string) (*TenantConfig, error) {
-	fileName := fmt.Sprintf("%s/datamodel.json", path)
+func loadDataModelFromFile(path string, version int) (*TenantConfig, error) {
+	fileName := fmt.Sprintf("%s-%03d/datamodel.json", path, version)
 	jsonData, err := os.ReadFile(fileName)
 	if err != nil {
 		return nil, err
@@ -168,19 +163,28 @@ func loadDataModelFromFile(path string) (*TenantConfig, error) {
 	if err = json.Unmarshal(jsonData, &tc); err != nil {
 		return nil, err
 	}
+
+	if tc.Version != version {
+		return nil, fmt.Errorf("tenant version does not match. Expected %d, got %d", version, tc.Version)
+	}
+
+	if tc.Subject == "" {
+		return nil, fmt.Errorf("subject is empty")
+	}
+
 	return &tc, nil
 }
 
-func ReadPrefix(path, key string) string {
-	tc, err := loadDataModelFromFile(path)
+func ReadPrefix(path, key string, version int) string {
+	tc, err := loadDataModelFromFile(path, version)
 	if err != nil {
 		return ""
 	}
 	return tc.GetPrefix(key)
 }
 
-func LoadDataModel(path string) (*TenantConfig, error) {
-	tc, err := loadDataModelFromFile(path)
+func LoadDataModel(path string, version int) (*TenantConfig, error) {
+	tc, err := loadDataModelFromFile(path, version)
 	if err != nil {
 		return nil, err
 	}
@@ -198,8 +202,8 @@ func LoadDataModel(path string) (*TenantConfig, error) {
 	return tc, nil
 }
 
-func LoadDataModelByRole(path string, role string) (*TenantConfig, error) {
-	tc, err := LoadDataModel(path)
+func LoadDataModelByRole(path, role string, version int) (*TenantConfig, error) {
+	tc, err := LoadDataModel(path, version)
 	if err != nil {
 		return nil, err
 	}
@@ -233,8 +237,4 @@ func LoadDataModelByRole(path string, role string) (*TenantConfig, error) {
 	tc.Roles = nil
 
 	return tc, nil
-}
-
-func GetConfigPath(basePath, tenant string, version int) string {
-	return fmt.Sprintf("%s/%s-%03d", basePath, tenant, version)
 }

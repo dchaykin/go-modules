@@ -161,8 +161,8 @@ func GetDomainConfig(r *http.Request, configPath, rootName, userRole string) (*h
 		return GetErrorResponse(err), http.StatusUnauthorized
 	}
 
-	path := GetConfigPath(configPath, tenant, version)
-	tenantConfig, err := LoadDataModelByRole(path, userIdentity.Role(userRole))
+	path := fmt.Sprintf("%s/%s", configPath, tenant)
+	tenantConfig, err := LoadDataModelByRole(path, userIdentity.Role(userRole), version)
 	if err != nil {
 		return GetErrorResponse(err), http.StatusInternalServerError
 	}

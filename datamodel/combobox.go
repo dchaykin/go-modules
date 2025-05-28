@@ -39,7 +39,7 @@ type TenantComboboxList map[string]TenantCombobox
 type TenantComboboxDatamodel map[string]TenantComboboxList
 
 func loadTenantComboboxList(path2config, cmbFileName string, version int) (*TenantComboboxDatamodel, error) {
-	fileName := fmt.Sprintf("%s/%s", path2config, cmbFileName)
+	fileName := fmt.Sprintf("%s-%03d/%s", path2config, version, cmbFileName)
 	jsonData, err := os.ReadFile(fileName)
 	if err != nil {
 		return nil, err
