@@ -38,7 +38,7 @@ type TenantConfig struct {
 	Roles     *map[string]roleFiles    `json:"roles,omitempty"`
 	Layout    any                      `json:"layout"`
 	Cmbs      *TenantComboboxDatamodel `json:"cmbs,omitempty"`
-	Overviews TenantOverviewDatamodel  `json:"overviews,omitempty"`
+	Overviews *OverviewModel           `json:"overview,omitempty"`
 	Prefix    map[string]string        `json:"prefix"`
 }
 
@@ -111,7 +111,7 @@ func (tc *TenantConfig) buildRole(roleConfig roleFiles, roleName string) error {
 	}
 
 	// Overviews
-	overviews, err := roleConfig.getOverviews(tc.path)
+	overviews, err := roleConfig.getOverviewModel(tc.path)
 	if err != nil {
 		return err
 	}
@@ -120,17 +120,11 @@ func (tc *TenantConfig) buildRole(roleConfig roleFiles, roleName string) error {
 		if tc.Overviews == nil {
 			tc.Overviews = overviews
 		} else {
-			for subject, overviewConfig := range overviews {
-				overview, ok := tc.Overviews[subject]
-				if !ok {
-					tc.Overviews[subject] = overviewSubject{}
-					overview = tc.Overviews[subject]
-				}
-				overview.mergeOverview(overviewConfig)
-			}
+			tc.Overviews = &OverviewModel{}
+			tc.Overviews.mergeOverviews(*overviews)
 		}
 	} else if tc.Overviews == nil {
-		tc.Overviews = TenantOverviewDatamodel{}
+		tc.Overviews = &OverviewModel{}
 	}
 
 	return nil

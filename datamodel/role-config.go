@@ -52,7 +52,7 @@ func (rf roleFiles) getFields(path2config string) (map[string]recordConfig, erro
 	return fcfg, nil
 }
 
-func (rf roleFiles) getOverviews(path2config string) (TenantOverviewDatamodel, error) {
+func (rf roleFiles) getOverviewModel(path2config string) (*OverviewModel, error) {
 	if rf.OverviewFile == "" {
 		return nil, nil
 	}
@@ -63,11 +63,11 @@ func (rf roleFiles) getOverviews(path2config string) (TenantOverviewDatamodel, e
 		return nil, err
 	}
 
-	ocl := map[string]overviewSubject{}
+	ocl := OverviewModel{}
 	if err = json.Unmarshal(jsonData, &ocl); err != nil {
 		return nil, err
 	}
-	return ocl, nil
+	return &ocl, nil
 }
 
 /***********************************************/
@@ -148,17 +148,17 @@ type overviewConfig struct {
 	Name string `json:"name"` // Unique Key
 }
 
-type overviewSubject struct {
+type OverviewModel struct {
 	CommandList  []OverviewCommand `json:"command"`
 	OverviewList []overviewConfig  `json:"overview"`
 }
 
-func (ov *overviewSubject) mergeOverview(source overviewSubject) {
+func (ov *OverviewModel) mergeOverviews(source OverviewModel) {
 	ov.mergeCommandList(source.CommandList)
 	ov.mergeOverviewList(source.OverviewList)
 }
 
-func (ov *overviewSubject) mergeCommandList(srcCommandList []OverviewCommand) {
+func (ov *OverviewModel) mergeCommandList(srcCommandList []OverviewCommand) {
 	for _, sourceCmd := range srcCommandList {
 		cmd := ov.getCommandByAction(sourceCmd.Action)
 		if cmd == nil {
@@ -169,7 +169,7 @@ func (ov *overviewSubject) mergeCommandList(srcCommandList []OverviewCommand) {
 	}
 }
 
-func (ov overviewSubject) getCommandByAction(action string) *OverviewCommand {
+func (ov OverviewModel) getCommandByAction(action string) *OverviewCommand {
 	for i, cmd := range ov.CommandList {
 		if cmd.Action == action {
 			return &ov.CommandList[i]
@@ -178,7 +178,7 @@ func (ov overviewSubject) getCommandByAction(action string) *OverviewCommand {
 	return nil
 }
 
-func (ov *overviewSubject) mergeOverviewList(srcOverviewList []overviewConfig) {
+func (ov *OverviewModel) mergeOverviewList(srcOverviewList []overviewConfig) {
 	for _, sourceOverview := range srcOverviewList {
 		overviewConfig := ov.getOverviewByName(sourceOverview.Name)
 		if overviewConfig == nil {
@@ -189,32 +189,11 @@ func (ov *overviewSubject) mergeOverviewList(srcOverviewList []overviewConfig) {
 	}
 }
 
-func (ov overviewSubject) getOverviewByName(name string) *overviewConfig {
+func (ov OverviewModel) getOverviewByName(name string) *overviewConfig {
 	for i, overview := range ov.OverviewList {
 		if overview.Name == name {
 			return &ov.OverviewList[i]
 		}
 	}
 	return nil
-}
-
-type TenantOverviewDatamodel map[string]overviewSubject
-
-func (to TenantOverviewDatamodel) GetAllowedActions(subject string) []OverviewCommand {
-	if to == nil {
-		return nil
-	}
-
-	if !to.subjectExists(subject) {
-		return nil
-	}
-
-	return to[subject].CommandList
-}
-
-func (to TenantOverviewDatamodel) subjectExists(subject string) bool {
-	if _, ok := to[subject]; ok {
-		return true
-	}
-	return false
 }
