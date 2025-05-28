@@ -12,7 +12,7 @@ const (
 	overviewCommandRemove   = "remove"
 )
 
-type overviewCommand struct {
+type OverviewCommand struct {
 	Action string `json:"action"` // Unique Key
 	Icon   string `json:"icon"`
 	Link   string `json:"link"`

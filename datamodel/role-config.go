@@ -149,18 +149,16 @@ type overviewConfig struct {
 }
 
 type overviewSubject struct {
-	CommandList  []overviewCommand `json:"command"`
+	CommandList  []OverviewCommand `json:"command"`
 	OverviewList []overviewConfig  `json:"overview"`
 }
-
-type TenantOverviewDatamodel map[string]overviewSubject
 
 func (ov *overviewSubject) mergeOverview(source overviewSubject) {
 	ov.mergeCommandList(source.CommandList)
 	ov.mergeOverviewList(source.OverviewList)
 }
 
-func (ov *overviewSubject) mergeCommandList(srcCommandList []overviewCommand) {
+func (ov *overviewSubject) mergeCommandList(srcCommandList []OverviewCommand) {
 	for _, sourceCmd := range srcCommandList {
 		cmd := ov.getCommandByAction(sourceCmd.Action)
 		if cmd == nil {
@@ -171,7 +169,7 @@ func (ov *overviewSubject) mergeCommandList(srcCommandList []overviewCommand) {
 	}
 }
 
-func (ov overviewSubject) getCommandByAction(action string) *overviewCommand {
+func (ov overviewSubject) getCommandByAction(action string) *OverviewCommand {
 	for i, cmd := range ov.CommandList {
 		if cmd.Action == action {
 			return &ov.CommandList[i]
@@ -198,4 +196,25 @@ func (ov overviewSubject) getOverviewByName(name string) *overviewConfig {
 		}
 	}
 	return nil
+}
+
+type TenantOverviewDatamodel map[string]overviewSubject
+
+func (to TenantOverviewDatamodel) GetAllowedActions(subject string) []OverviewCommand {
+	if to == nil {
+		return nil
+	}
+
+	if !to.subjectExists(subject) {
+		return nil
+	}
+
+	return to[subject].CommandList
+}
+
+func (to TenantOverviewDatamodel) subjectExists(subject string) bool {
+	if _, ok := to[subject]; ok {
+		return true
+	}
+	return false
 }
