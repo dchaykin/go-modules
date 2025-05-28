@@ -3,7 +3,6 @@ package overview
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 
@@ -47,33 +46,4 @@ func UpdateOverviewRow(userIdentity auth.UserIdentity, domainEntity datamodel.Do
 	}
 
 	return nil
-}
-
-func PrepareOverviewCommand(w http.ResponseWriter, r *http.Request) (auth.UserIdentity, *OverviewCommand) {
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		httpcomm.SetResponseError(&w, "Unable to fetch payload from body", err, http.StatusBadRequest)
-		return nil, nil
-	}
-	defer r.Body.Close()
-
-	userIdentity, err := auth.GetUserIdentityFromRequest(*r)
-	if err != nil {
-		httpcomm.SetResponseError(&w, "", err, http.StatusUnauthorized)
-		return nil, nil
-	}
-
-	if !userIdentity.IsAdmin() {
-		httpcomm.SetResponseError(&w, "permission denied", nil, http.StatusForbidden)
-		return nil, nil
-	}
-
-	overviewCommand := OverviewCommand{}
-	err = json.Unmarshal(body, &overviewCommand)
-	if err != nil {
-		httpcomm.SetResponseError(&w, "Unable to unmarshal payload", err, http.StatusBadRequest)
-		return nil, nil
-	}
-
-	return userIdentity, &overviewCommand
 }

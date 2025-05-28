@@ -3,10 +3,10 @@ package overview
 import "github.com/dchaykin/go-modules/datamodel"
 
 const (
-	ActionCreate = "create"
-	ActionOpen   = "open"
-	ActionPrint  = "print"
-	ActionDelete = "delete"
+	ActionCreate   = "create"
+	ActionOpen     = "open"
+	ActionPrintPdf = "printPdf"
+	ActionDelete   = "delete"
 )
 
 type OverviewAction struct {
@@ -16,23 +16,7 @@ type OverviewAction struct {
 	Field   string `json:"field"`
 }
 
-type SubjectConfig struct {
-	Name       string                 `json:"name"`
-	ActionList []OverviewAction       `json:"actions"`
-	Fields     datamodel.CustomFields `json:"fields"`
-}
-
 type DataRecord struct {
 	Row    map[string]any           `json:"row"`
 	Access []datamodel.AccessConfig `json:"access"`
-}
-
-type OverviewCommand struct {
-	Subject string `json:"-"`
-
-	CreateTable    *bool            `json:"createTable,omitempty"`
-	ActionList     []OverviewAction `json:"actions,omitempty"`
-	FillData       *bool            `json:"fillData,omitempty"`
-	FillComboboxes *bool            `json:"fillComboboxes,omitempty"`
-	FillCombobox   *string          `json:"fillCombobox,omitempty"`
 }
