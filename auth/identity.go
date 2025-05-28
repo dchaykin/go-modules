@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"slices"
 
 	"github.com/dchaykin/go-modules/log"
 	"github.com/golang-jwt/jwt/v4"
@@ -12,7 +13,7 @@ import (
 
 type UserIdentity interface {
 	Partner() string
-	TenantList() []string
+	Tenant() string
 	RoleBySubject(subject string) string
 	FirstName() string
 	SurName() string
@@ -25,6 +26,7 @@ type UserIdentity interface {
 
 type userToken struct {
 	Claims jwt.MapClaims `json:"claims"`
+	tenant string
 }
 
 func (j userToken) Partner() string {
@@ -50,13 +52,20 @@ func (j userToken) RoleBySubject(subject string) string {
 	return ""
 }
 
-func (j userToken) TenantList() []string {
+func (j userToken) tenantList() []string {
 	claim, ok := j.Claims["tenant"]
 	if !ok {
 		log.Warn("No tenant found")
 		return []string{}
 	}
 	return claim.([]string)
+}
+
+func (j userToken) Tenant() string {
+	if slices.Contains(j.tenantList(), j.tenant) {
+		return j.tenant
+	}
+	return j.tenant
 }
 
 func (j userToken) FirstName() string {
@@ -140,6 +149,7 @@ func GetUserIdentity(authorization, secret string) (UserIdentity, error) {
 	}
 	return &userToken{
 		Claims: claims,
+		tenant: "default", // TODO
 	}, nil
 }
 
