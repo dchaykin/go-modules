@@ -143,10 +143,15 @@ func GetErrorResponse(err error) *httpcomm.ServiceResponse {
 	return &result
 }
 
-func GetDomainConfig(r *http.Request, configPath, rootName, userRole string) (*httpcomm.ServiceResponse, int) {
+func GetTenantVersionFromRequest(r *http.Request) (string, int, error) {
 	tenant := r.URL.Query().Get("tenant")
 	versionParam := r.URL.Query().Get("version")
 	version, err := strconv.Atoi(versionParam)
+	return tenant, version, err
+}
+
+func GetDomainConfig(r *http.Request, configPath, rootName, userRole string) (*httpcomm.ServiceResponse, int) {
+	tenant, version, err := GetTenantVersionFromRequest(r)
 	if err != nil {
 		return GetErrorResponse(err), http.StatusBadRequest
 	}
