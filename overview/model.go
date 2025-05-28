@@ -2,6 +2,13 @@ package overview
 
 import "github.com/dchaykin/go-modules/datamodel"
 
+const (
+	ActionCreate = "create"
+	ActionOpen   = "open"
+	ActionPrint  = "print"
+	ActionDelete = "delete"
+)
+
 type OverviewAction struct {
 	Command string `json:"command"`
 	Icon    string `json:"icon"`
