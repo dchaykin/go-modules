@@ -89,3 +89,11 @@ func EnsureUUID(domainEntity datamodel.DomainEntity) error {
 	domainEntity.SetUUID(uuid)
 	return nil
 }
+
+func ValueString(fields map[string]any, fieldName string) string {
+	value, ok := fields[fieldName]
+	if !ok || value == nil {
+		return ""
+	}
+	return fmt.Sprintf("%s", value)
+}
