@@ -3,7 +3,6 @@ package datamodel
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/dchaykin/go-modules/auth"
@@ -22,10 +21,10 @@ type Record struct {
 	Fields   map[string]any `json:"entity" bson:"entity"`
 }
 
-func (r *Record) SetMetaData(userIdentity auth.UserIdentity, userRole string) {
+func (r *Record) SetMetadata(userIdentity auth.UserIdentity, subject string) {
 	r.Metadata.Timestamp = time.Now()
 	r.Metadata.Partner = userIdentity.Partner()
-	r.Metadata.Role = userIdentity.Role(userRole)
+	r.Metadata.Role = userIdentity.RoleBySubject(subject)
 	r.Metadata.User = userIdentity.Username()
 }
 
@@ -105,45 +104,13 @@ func (r Record) Entity() map[string]any {
 	return r.Fields
 }
 
-func (r Record) ValueString(fieldName string) string {
-	if value, ok := r.Fields[fieldName]; ok {
-		return fmt.Sprintf("%s", value)
-	}
-	return ""
-}
-
-func (r Record) ValueInt(fieldName string) int {
-	result, _ := strconv.Atoi(r.ValueString(fieldName))
-	return result
-}
-
-func (r Record) ValueFloat(fieldName string) float32 {
-	result, _ := strconv.ParseFloat(r.ValueString(fieldName), 32)
-	return float32(result)
-}
-
-func (r Record) ValueDate(fieldName string) *time.Time {
-	if value, ok := r.Fields[fieldName]; ok && value != nil {
-		result := value.(time.Time)
-		return &result
-	}
-	return nil
-}
-
-func (r Record) ValueBool(fieldName string) bool {
-	if value, ok := r.Fields[fieldName]; ok && value != nil {
-		return value.(bool)
-	}
-	return false
-}
-
 func GetErrorResponse(err error) *httpcomm.ServiceResponse {
 	result := httpcomm.ServiceResponse{Error: new(string)}
 	*result.Error = fmt.Sprintf("%v", err)
 	return &result
 }
 
-func GetDomainConfig(r *http.Request, configPath, rootName, userRole string) (*httpcomm.ServiceResponse, int) {
+func GetDomainConfig(r *http.Request, configPath, subject string) (*httpcomm.ServiceResponse, int) {
 	tenant, version, err := httpcomm.GetTenantVersionFromRequest(r)
 	if err != nil {
 		return GetErrorResponse(err), http.StatusBadRequest
@@ -155,12 +122,12 @@ func GetDomainConfig(r *http.Request, configPath, rootName, userRole string) (*h
 	}
 
 	path := fmt.Sprintf("%s/%s", configPath, tenant)
-	tenantConfig, err := LoadDataModelByRole(path, userIdentity.Role(userRole), version)
+	tenantConfig, err := LoadDataModelByRole(path, userIdentity.RoleBySubject(subject), version)
 	if err != nil {
 		return GetErrorResponse(err), http.StatusInternalServerError
 	}
 
-	domainEntity := tenantConfig.DataModel[rootName]
+	domainEntity := tenantConfig.DataModel[subject]
 	uuid, err := GenerateUUID()
 	if err != nil {
 		return GetErrorResponse(err), http.StatusInternalServerError

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/dchaykin/go-modules/auth"
 	"github.com/dchaykin/go-modules/datamodel"
@@ -53,27 +52,7 @@ func (de testDomainEntity) Entity() map[string]any {
 	return de.Data
 }
 
-func (de testDomainEntity) ValueString(fieldName string) string {
-	return ""
-}
-
-func (de testDomainEntity) ValueInt(fieldName string) int {
-	return 0
-}
-
-func (de testDomainEntity) ValueFloat(fieldName string) float32 {
-	return 0
-}
-
-func (de testDomainEntity) ValueDate(fieldName string) *time.Time {
-	return nil
-}
-
-func (de testDomainEntity) ValueBool(fieldName string) bool {
-	return false
-}
-
-func (de *testDomainEntity) SetMetaData(userIdentity auth.UserIdentity, userRole string) {
+func (de *testDomainEntity) SetMetadata(userIdentity auth.UserIdentity, subject string) {
 
 }
 

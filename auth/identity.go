@@ -13,7 +13,7 @@ import (
 type UserIdentity interface {
 	Partner() string
 	TenantList() []string
-	Role(name string) string
+	RoleBySubject(subject string) string
 	FirstName() string
 	SurName() string
 	Email() string
@@ -36,13 +36,18 @@ func (j userToken) Partner() string {
 	return claim.(string)
 }
 
-func (j userToken) Role(name string) string {
-	claim, ok := j.Claims[name]
+func (j userToken) RoleBySubject(subject string) string {
+	rolesClaim, ok := j.Claims["roles"]
 	if !ok {
-		log.Warn("Role '%s' is not claimed", name)
+		log.Warn("User has no roles")
 		return ""
 	}
-	return claim.(string)
+	roles := rolesClaim.(map[string]string)
+	if result, ok := roles[subject]; ok {
+		return result
+	}
+	log.Warn("User has no role %s", subject)
+	return ""
 }
 
 func (j userToken) TenantList() []string {
