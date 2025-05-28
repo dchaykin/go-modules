@@ -1,0 +1,30 @@
+{
+    "roles": {
+        "name": {
+            "translate": false,
+            "content": [
+                { "id": "user", "value": "User Management" },
+                { "id": "user", "value": "Partner Management" },
+                { "id": "inquiry", "value": "Inquiry" }
+            ],
+            "name": "roleModule",
+            "type": "static"
+        },
+        "value": {
+            "translate": false,
+            "content": [
+                { "id": "customer", "value": "Customer" },
+                { "id": "supplier", "value": "Supplier" }
+            ],
+            "name": "roleName",
+            "type": "static"
+        }
+    },
+    "user": {
+        "partner": {
+            "type": "api",
+            "source": "/app-config/api/partner/cmbs/userPartner",
+            "name": "userPartner"
+        }
+    }
+}

@@ -1,0 +1,11 @@
+{
+    "user": {
+        "roles": { "command": "add,remove" },
+        "username": { "mandatory": true },
+        "password": { "mandatory": true },
+        "firstName": { "mandatory": true },
+        "surName": { "mandatory": true },
+        "eMail": { "mandatory": true },
+        "partner": { "mandatory": true }
+    }
+}

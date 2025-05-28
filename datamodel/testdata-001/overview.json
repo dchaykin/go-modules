@@ -1,0 +1,11 @@
+{
+    "user": {
+        "command": [
+            { "action": "create", "icon": "add", "link": "/app-config/user/new" },
+            { "action": "open", "icon": "open", "link": "/app-config/user/data/{uuid}", "field": "uuid" }
+        ],
+        "overview": [
+            { "name": "all" }
+        ]
+    }
+}

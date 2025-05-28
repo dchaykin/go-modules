@@ -1,0 +1,64 @@
+{
+    "version": 1,
+    "subject": "user",
+    "datamodel": {
+        "user": {
+            "uuid": {},
+            "username": {},
+            "password": { "masked": true },
+            "firstName": {},
+            "surName": {},
+            "eMail": {},
+            "comment": {},
+            "admin": { "type": "bool" },
+            "partner": { "type": "cmb" },
+            "roles": { "type": "list" }
+        },
+        "roles": {
+            "name": { "type": "cmb" },
+            "value": { "type": "cmb" },
+            "description": { }
+        }
+    },
+    "roles": {
+        "default": {
+            "combobox": "comboboxes.json",
+            "overview": "overview.json"
+        },
+        "customer": {
+            "field": "fields-customer.json"
+        }
+    },
+    "layout": {
+        "default": {
+            "top": [ "userMain" ],
+            "center": [ "userDetails", "userRoles" ],
+            "bottom": [ ],
+            "frames": {
+                "userMain": {
+                    "title": "", "data": "user",
+                    "content": [
+                        { "cols": 2, "rowHeight": "50px", 
+                            "fields": [ "username", "password" ] }
+                    ]
+                },
+                "userDetails": {
+                    "title": "", "data": "user",
+                    "content": [
+                        { "cols": 2, "rowHeight": "50px", 
+                            "fields": [
+                                "firstName", "surName",
+                                "eMail", "partner",
+                                "admin", "comment" ] }
+                    ]
+                },
+                "userRoles": {
+                    "title": "roles", "data": "user.roles", "design": "table",
+                    "content": [
+                        { "fields": [ "name", "value", "description" ] }
+                    ]
+                }
+            }
+        }
+    }
+}
