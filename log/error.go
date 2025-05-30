@@ -5,20 +5,36 @@ import (
 	"runtime"
 )
 
+type stackTrace struct {
+	file string
+	line int
+}
+
 type errorWithPos struct {
-	File string
-	Line int
-	Err  error
+	stackTrace []stackTrace
+	err        error
 }
 
 func (e *errorWithPos) Error() string {
-	return fmt.Sprintf("%s:%d: %v", e.File, e.Line, e.Err)
+	result := fmt.Sprintf("%v", e.err)
+	for _, s := range e.stackTrace {
+		result += fmt.Sprintf("\n%s:%d", s.file, s.line)
+	}
+	return result
+}
+
+func (e *errorWithPos) appendTrace(file string, line int) {
+	e.stackTrace = append(e.stackTrace, stackTrace{file: file, line: line})
 }
 
 func WrapError(err error) error {
-	if err == nil {
-		return nil
-	}
 	_, file, line, _ := runtime.Caller(1)
-	return &errorWithPos{File: file, Line: line, Err: err}
+	switch e := err.(type) {
+	case *errorWithPos:
+		e.appendTrace(file, line)
+		return e
+	}
+	result := &errorWithPos{err: err}
+	result.appendTrace(file, line)
+	return result
 }

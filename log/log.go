@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"runtime"
 	"strings"
 )
 
@@ -53,11 +52,12 @@ func Info(msg string, args ...any) {
 }
 
 func Error(msg string, args ...any) {
-	buf := make([]byte, 1024)
-	runtime.Stack(buf, false)
-	logger.Error(fmt.Sprintf(msg, args...))
-	parts := strings.Split(string(buf), "\n")
+	parts := strings.Split(msg, "\n")
 	for i, part := range parts {
-		logger.Error("Stacktrace", fmt.Sprintf("%d", i), part)
+		if i == 0 {
+			logger.Error(part)
+			continue
+		}
+		logger.Error("stacktrace", fmt.Sprintf("%d", i), part)
 	}
 }
