@@ -11,7 +11,7 @@ PATCH="${VERSION%%.*}"; VERSION="${VERSION#*.}"
 
 #Increase version
 PATCH=$((PATCH+1))
-#MINOR=$((MINOR+1)) && PATCH=0
+# MINOR=$((MINOR+1)) && PATCH=0
 
 #Get current hash and see if it already has a tag
 GIT_COMMIT=`git rev-parse HEAD`

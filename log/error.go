@@ -28,6 +28,9 @@ func (e *errorWithPos) appendTrace(file string, line int) {
 }
 
 func WrapError(err error) error {
+	if err == nil {
+		return nil
+	}
 	_, file, line, _ := runtime.Caller(1)
 	switch e := err.(type) {
 	case *errorWithPos:
