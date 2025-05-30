@@ -77,7 +77,7 @@ func PostToServiceIntern(serviceURL string, identity auth.UserIdentity, payload 
 	var response []byte
 	if response, err = PostData(serviceURL, identity, string(payload)); err != nil {
 		if response != nil {
-			log.Error("Response from %s: %s", serviceURL, string(response))
+			log.Errorf("Response from %s: %s", serviceURL, string(response))
 		}
 		return err
 	}

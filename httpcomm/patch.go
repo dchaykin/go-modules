@@ -12,7 +12,7 @@ func PatchToServiceIntern(serviceURL string, identity auth.UserIdentity, param m
 	var response []byte
 	if response, err = PatchData(serviceURL, identity, param, string(payload)); err != nil {
 		if response != nil {
-			log.Error("Response from %s: %s", serviceURL, string(response))
+			log.Errorf("Response from %s: %s", serviceURL, string(response))
 		}
 		return err
 	}

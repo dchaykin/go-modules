@@ -11,7 +11,7 @@ func TestWrapError(t *testing.T) {
 	err := errorFunc3()
 	require.Error(t, err)
 
-	Error(err.Error())
+	Error(err)
 }
 
 func errorFunc3() error {

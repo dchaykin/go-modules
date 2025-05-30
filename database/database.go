@@ -120,7 +120,7 @@ func (mc *mongoClient) ping(ctx context.Context) error {
 func (mc *mongoClient) isConnected() bool {
 	if mc.client != nil {
 		if err := mc.ping(context.Background()); err != nil {
-			log.Error("%v", err)
+			log.WrapError(err)
 			return false
 		}
 		return true
@@ -158,13 +158,13 @@ func HasMongoAccess() bool {
 
 	s, err := OpenSession()
 	if err != nil {
-		log.Error("error: %v", err)
+		log.WrapError(err)
 		return false
 	}
 
 	defer func() {
 		if err := s.Close(); err != nil {
-			log.Error("%v", err)
+			log.WrapError(err)
 		}
 	}()
 

@@ -61,7 +61,13 @@ func (sr *ServiceResponse) setError(msg string, err error) {
 }
 
 func SetResponseError(w *http.ResponseWriter, msg string, err error, httpStatus int) {
-	log.Error(msg, err)
+	if err != nil && msg != "" {
+		log.Errorf("%s. Error: %v", msg, err)
+	} else if err != nil {
+		log.Error(err)
+	} else if msg != "" {
+		log.Errorf(msg)
+	}
 	sr := ServiceResponse{}
 	sr.setError(msg, err)
 	data, e := json.Marshal(sr)

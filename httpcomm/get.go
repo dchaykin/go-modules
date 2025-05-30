@@ -37,7 +37,7 @@ func (hr *HTTPResult) GetError() error {
 func (hr *HTTPResult) GetURL() string {
 	u, err := neturl.Parse(hr.url)
 	if err != nil {
-		log.Error("%v", err)
+		log.WrapError(err)
 		return ""
 	}
 	return fmt.Sprintf("%s://%s%s", u.Scheme, u.Host, u.Path)
@@ -60,7 +60,7 @@ func get(url string, parameters map[string]string, headers map[string]string, in
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		log.Error("%v", err)
+		log.WrapError(err)
 	}
 
 	for key := range headers {
@@ -107,7 +107,7 @@ func GetFromServiceIntern(identity auth.UserIdentity, serviceURL string, param m
 	var response []byte
 	if response, err = getDataIntern(identity, serviceURL, param); err != nil {
 		if response != nil {
-			log.Error("Response from %s: %s", serviceURL, string(response))
+			log.Errorf("Response from %s: %s", serviceURL, string(response))
 		}
 		serviceResponse.setError("", err)
 		return serviceResponse, err
