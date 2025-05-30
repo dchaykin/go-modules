@@ -51,8 +51,8 @@ func Info(msg string, args ...any) {
 	logger.Info(fmt.Sprintf(msg, args...))
 }
 
-func Error(msg string, args ...any) {
-	parts := strings.Split(msg, "\n")
+func Error(err error) {
+	parts := strings.Split(err.Error(), "\n")
 	for i, part := range parts {
 		if i == 0 {
 			logger.Error(part)
@@ -60,4 +60,8 @@ func Error(msg string, args ...any) {
 		}
 		logger.Error("stacktrace", fmt.Sprintf("%d", i), part)
 	}
+}
+
+func Errorf(msg string, args ...any) {
+	logger.Error(fmt.Sprintf(msg, args...))
 }
