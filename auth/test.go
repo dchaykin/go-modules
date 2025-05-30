@@ -4,6 +4,7 @@ import "net/http"
 
 type TestUser struct {
 	Claims map[string]any
+	tenant string
 }
 
 func (u TestUser) Partner() string {
@@ -11,7 +12,7 @@ func (u TestUser) Partner() string {
 }
 
 func (u TestUser) Tenant() string {
-	return u.Claims["tenant"].(string)
+	return u.tenant
 }
 
 func (u TestUser) RoleBySubject(subject string) string {
@@ -62,5 +63,6 @@ func GetTestUserIdentity() UserIdentity {
 			"admin":     false,
 			"developer": false,
 		},
+		tenant: "default",
 	}
 }
