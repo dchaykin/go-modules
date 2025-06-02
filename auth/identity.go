@@ -25,8 +25,8 @@ type UserIdentity interface {
 }
 
 type userToken struct {
-	Claims jwt.MapClaims `json:"claims"`
-	tenant string
+	Claims        jwt.MapClaims `json:"claims"`
+	CurrentTenant string        `json:"currentTenant"`
 }
 
 func (j userToken) Partner() string {
@@ -66,10 +66,10 @@ func (j userToken) tenantList() []string {
 }
 
 func (j userToken) Tenant() string {
-	if slices.Contains(j.tenantList(), j.tenant) {
-		return j.tenant
+	if slices.Contains(j.tenantList(), j.CurrentTenant) {
+		return j.CurrentTenant
 	}
-	return j.tenant
+	return j.CurrentTenant
 }
 
 func (j userToken) FirstName() string {
@@ -152,8 +152,8 @@ func GetUserIdentity(authorization, secret string) (UserIdentity, error) {
 		return nil, err
 	}
 	return &userToken{
-		Claims: claims,
-		tenant: "default", // TODO
+		Claims:        claims,
+		CurrentTenant: "default", // TODO
 	}, nil
 }
 
