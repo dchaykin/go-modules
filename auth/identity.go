@@ -58,7 +58,11 @@ func (j userToken) tenantList() []string {
 		log.Warn("No tenant found")
 		return []string{}
 	}
-	return claim.([]string)
+	result := []string{}
+	for _, v := range claim.([]interface{}) {
+		result = append(result, fmt.Sprintf("%v", v))
+	}
+	return result
 }
 
 func (j userToken) Tenant() string {
