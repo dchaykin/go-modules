@@ -6,8 +6,8 @@ import (
 )
 
 type TestUser struct {
-	Claims map[string]any
-	tenant string
+	Claims        map[string]any
+	CurrentTenant string
 }
 
 func (u TestUser) Partner() string {
@@ -15,7 +15,7 @@ func (u TestUser) Partner() string {
 }
 
 func (u TestUser) Tenant() string {
-	return u.tenant
+	return u.CurrentTenant
 }
 
 func (u TestUser) RoleBySubject(subject string) string {
@@ -66,6 +66,6 @@ func GetTestUserIdentity() UserIdentity {
 			"admin":     false,
 			"developer": false,
 		},
-		tenant: "default",
+		CurrentTenant: "default",
 	}
 }
