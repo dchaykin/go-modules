@@ -56,7 +56,7 @@ func GetTestUserIdentity() UserIdentity {
 		Claims: map[string]any{
 			"partner": "PARTNER-X",
 			"tenant":  []string{"default"},
-			"role": map[string]string{
+			"role": map[string]any{
 				"testCase": "customer",
 			},
 			"firstName": "John",
