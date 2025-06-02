@@ -44,9 +44,9 @@ func (j userToken) RoleBySubject(subject string) string {
 		log.Warn("User has no roles")
 		return ""
 	}
-	roles := rolesClaim.(map[string]string)
+	roles := rolesClaim.(map[string]any)
 	if result, ok := roles[subject]; ok {
-		return result
+		return fmt.Sprintf("%v", result)
 	}
 	log.Warn("User has no role %s", subject)
 	return ""

@@ -1,6 +1,9 @@
 package auth
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
 type TestUser struct {
 	Claims map[string]any
@@ -16,8 +19,8 @@ func (u TestUser) Tenant() string {
 }
 
 func (u TestUser) RoleBySubject(subject string) string {
-	roles := u.Claims["role"].(map[string]string)
-	return roles[subject]
+	roles := u.Claims["role"].(map[string]any)
+	return fmt.Sprintf("%v", roles[subject])
 }
 
 func (u TestUser) FirstName() string {
