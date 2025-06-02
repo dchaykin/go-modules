@@ -12,19 +12,19 @@ import (
 	"github.com/dchaykin/go-modules/log"
 )
 
-func ConfigureOverview(userIdentity auth.UserIdentity, tenantConfig datamodel.TenantConfig, tenant string) error {
+func ConfigureOverview(userIdentity auth.UserIdentity, tenantConfig datamodel.TenantConfig, tenant, userRole string) error {
 	payload, err := json.Marshal(tenantConfig)
 	if err != nil {
 		return err
 	}
 
-	endpoint := fmt.Sprintf("https://%s/app-overview/api/create/overview/%s", os.Getenv("MYHOST"), tenant)
+	endpoint := fmt.Sprintf("https://%s/app-overview/api/create/overview/%s/%s", os.Getenv("MYHOST"), tenant, userRole)
 	resp := httpcomm.Post(endpoint, userIdentity, nil, string(payload))
 	if resp.StatusCode != http.StatusOK {
 		return resp.GetError()
 	}
 
-	log.Info("Overview %s config for tenant %s created, version %d. Response: %s", tenantConfig.Subject, tenant, tenantConfig.Version, string(resp.Answer))
+	log.Info("Overview %s config for tenant %s and role %s created, version %d. Response: %s", tenantConfig.Subject, tenant, userRole, tenantConfig.Version, string(resp.Answer))
 	return nil
 }
 
