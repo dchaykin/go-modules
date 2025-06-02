@@ -19,7 +19,7 @@ func (u TestUser) Tenant() string {
 }
 
 func (u TestUser) RoleBySubject(subject string) string {
-	roles := u.Claims["role"].(map[string]any)
+	roles := u.Claims["roles"].(map[string]any)
 	return fmt.Sprintf("%v", roles[subject])
 }
 
@@ -56,7 +56,7 @@ func GetTestUserIdentity() UserIdentity {
 		Claims: map[string]any{
 			"partner": "PARTNER-X",
 			"tenant":  []string{"default"},
-			"role": map[string]any{
+			"roles": map[string]any{
 				"testCase": "customer",
 			},
 			"firstName": "John",
