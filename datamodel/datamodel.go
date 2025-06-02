@@ -49,7 +49,7 @@ func (tc TenantConfig) GetPrefix(key string) string {
 	return ""
 }
 
-func (tc *TenantConfig) setReadonly() {
+func (tc *TenantConfig) setReadonly(readonly bool) {
 	for recordName := range tc.DataModel {
 		record, ok := tc.DataModel[recordName]
 		if !ok {
@@ -60,12 +60,12 @@ func (tc *TenantConfig) setReadonly() {
 			if !ok {
 				continue
 			}
-			field.setReadonly(true)
+			field.setReadonly(readonly)
 		}
 	}
 }
 
-func (tc *TenantConfig) buildRole(roleConfig roleFiles, roleName string) error {
+func (tc *TenantConfig) buildRole(roleConfig roleFiles, roleName string, isReadonlyIfMissing bool) error {
 	// Comboboxes
 	cmbs, err := roleConfig.getComboboxes(tc.path)
 	if err != nil {
@@ -91,7 +91,7 @@ func (tc *TenantConfig) buildRole(roleConfig roleFiles, roleName string) error {
 	}
 
 	if fields == nil {
-		tc.setReadonly()
+		tc.setReadonly(isReadonlyIfMissing)
 	} else {
 		for recordName, recordConfig := range fields {
 			record, ok := tc.DataModel[recordName]
@@ -232,7 +232,7 @@ func LoadDataModelByRole(path, roleName string, version int) (*TenantConfig, err
 		return nil, fmt.Errorf("no default config found")
 	}
 
-	err = tc.buildRole(defaultConfig, "default")
+	err = tc.buildRole(defaultConfig, "default", false)
 	if err != nil {
 		return nil, err
 	}
@@ -240,7 +240,7 @@ func LoadDataModelByRole(path, roleName string, version int) (*TenantConfig, err
 	roleName = strings.ToLower(roleName)
 	roleConfig, ok := (*tc.Roles)[roleName]
 	if ok {
-		err = tc.buildRole(roleConfig, roleName)
+		err = tc.buildRole(roleConfig, roleName, true)
 		if err != nil {
 			return nil, err
 		}
