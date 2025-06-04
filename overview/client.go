@@ -39,7 +39,7 @@ func UpdateOverviewRow(userIdentity auth.UserIdentity, domainEntity datamodel.Do
 		return log.WrapError(err)
 	}
 
-	endpoint := fmt.Sprintf("https://%s/app-overview/api/data/%s", os.Getenv("MYHOST"), domainEntity.CollectionName())
+	endpoint := fmt.Sprintf("https://%s/app-overview/api/save/%s", os.Getenv("MYHOST"), domainEntity.CollectionName())
 	resp := httpcomm.Post(endpoint, userIdentity, nil, string(payload))
 	if resp.StatusCode != http.StatusOK {
 		return resp.GetError()
