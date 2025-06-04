@@ -20,7 +20,6 @@ func enableCors(w *http.ResponseWriter) {
 
 func LoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Debug("Request: %s %s", r.Method, r.RequestURI)
 		next.ServeHTTP(w, r)
 	})
 }
@@ -38,6 +37,7 @@ func CorsMiddleware(next http.Handler) http.Handler {
 
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Debug("Request: %s %s", r.Method, r.URL.Path)
 		userIdentity, err := getUserIdentityFromToken(r.Header.Get("Authorization"))
 		if err != nil {
 			log.Info("Invalid user token: %v", err)
@@ -49,6 +49,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			}
 			reqClone := r.Clone(r.Context())
 			reqClone.Header.Set("X-User-Info", string(userData))
+			log.Debug("User: %s", userData)
 			next.ServeHTTP(w, reqClone)
 			return
 		}
