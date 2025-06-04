@@ -57,7 +57,7 @@ func Get(url string, parameters map[string]string, headers map[string]string) (h
 }
 
 func get(url string, parameters map[string]string, headers map[string]string, insecure bool) (httpResult HTTPResult) {
-
+	log.Debug("/GET %s", url)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		log.WrapError(err)

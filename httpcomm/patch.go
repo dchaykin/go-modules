@@ -1,6 +1,7 @@
 package httpcomm
 
 import (
+	"bytes"
 	"io"
 	"net/http"
 
@@ -37,7 +38,9 @@ func PatchData(endpoint string, identity auth.UserIdentity, parameters map[strin
 func Patch(endpoint string, identity auth.UserIdentity, parameters map[string]string, headers map[string]string, data ...string) (httpResult HTTPResult) {
 	payload := getPayloadFromSlice(data...)
 
-	req, err := http.NewRequest("PATCH", endpoint, payload)
+	log.Debug("/PATCH %s [ %s ]", endpoint, payload)
+
+	req, err := http.NewRequest("PATCH", endpoint, bytes.NewReader([]byte(payload)))
 	if err != nil {
 		return HTTPResult{err: err}
 	}

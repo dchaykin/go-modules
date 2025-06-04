@@ -26,7 +26,9 @@ func Post(endpoint string, identity auth.UserIdentity, headers map[string]string
 func post(endpoint string, insecure bool, identity auth.UserIdentity, headers map[string]string, data ...string) (httpResult HTTPResult) {
 	payload := getPayloadFromSlice(data...)
 
-	req, err := http.NewRequest("POST", endpoint, payload)
+	log.Debug("/POST %s [ %s ]", endpoint, payload)
+
+	req, err := http.NewRequest("POST", endpoint, bytes.NewReader([]byte(payload)))
 	if err != nil {
 		return HTTPResult{err: err}
 	}
@@ -94,10 +96,10 @@ func PostToServiceIntern(serviceURL string, identity auth.UserIdentity, payload 
 	return nil
 }
 
-func getPayloadFromSlice(data ...string) *bytes.Reader {
+func getPayloadFromSlice(data ...string) string {
 	var payload string
 	for _, d := range data {
 		payload += d + " "
 	}
-	return bytes.NewReader([]byte(payload))
+	return payload
 }
