@@ -139,6 +139,20 @@ func (cf CustomField) Type() string {
 	return fmt.Sprintf("%s", cf["type"])
 }
 
+func (cf CustomField) ValueByType(value any) any {
+	if value == nil {
+		return nil
+	}
+	switch cf.Type() {
+	case FieldTypeDate:
+		date := fmt.Sprintf("%s", value)
+		if len(date) >= 10 {
+			return date[:10]
+		}
+	}
+	return value
+}
+
 func (cf *CustomField) setMandatory(mandatory bool) {
 	(*cf)["mandatory"] = nil
 	if mandatory {

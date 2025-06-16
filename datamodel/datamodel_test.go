@@ -28,3 +28,17 @@ func TestTenantConfig(t *testing.T) {
 	require.Equal(t, false, *roleNames.Translate)
 	require.Equal(t, 3, len(roleNames.Content))
 }
+
+func TestCustomFieldValueByType(t *testing.T) {
+	field := CustomField{
+		"type": FieldTypeDate,
+	}
+
+	require.Equal(t, "2025-06-16", field.ValueByType("2025-06-16T00:00:00.000+02:00"))
+
+	field["type"] = FieldTypeDateTime
+	require.Equal(t, "2025-06-16T00:00:00.000+02:00", field.ValueByType("2025-06-16T00:00:00.000+02:00"))
+
+	field["type"] = FieldTypeDate
+	require.Equal(t, "2025", field.ValueByType("2025"))
+}
