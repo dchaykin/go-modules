@@ -1,10 +1,13 @@
 package datamodel
 
 import (
+	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/dchaykin/go-modules/auth"
+	"github.com/dchaykin/go-modules/log"
 )
 
 type DomainEntity interface {
@@ -43,7 +46,12 @@ func (item DomainItem) AsBool(fieldName string, defaultValue bool) bool {
 	if !ok || value == nil {
 		return defaultValue
 	}
-	return value.(bool)
+	switch v := value.(type) {
+	case bool:
+		return v
+	default:
+		return defaultValue
+	}
 }
 
 func (item DomainItem) AsString(fieldName string, defaultValue string) string {
@@ -51,7 +59,7 @@ func (item DomainItem) AsString(fieldName string, defaultValue string) string {
 	if !ok || value == nil {
 		return defaultValue
 	}
-	return value.(string)
+	return fmt.Sprintf("%v", value)
 }
 
 func (item DomainItem) AsInt(fieldName string, defaultValue int) int {
@@ -59,7 +67,26 @@ func (item DomainItem) AsInt(fieldName string, defaultValue int) int {
 	if !ok || value == nil {
 		return defaultValue
 	}
-	return value.(int)
+	switch v := value.(type) {
+	case int:
+		return v
+	case int32:
+		return int(v)
+	case int64:
+		return int(v)
+	case float32:
+		return int(v)
+	case float64:
+		return int(v)
+	case string:
+		i, err := strconv.Atoi(v)
+		if err != nil {
+			log.Warn("could not convert string to int: %s, return default value %d", v, defaultValue)
+			return defaultValue
+		}
+		return i
+	}
+	return defaultValue
 }
 
 func (item DomainItem) Uniques(fieldNames []string, separator string) string {
