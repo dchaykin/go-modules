@@ -32,11 +32,11 @@ func (u TestUser) SurName() string {
 }
 
 func (u TestUser) Email() string {
-	return u.Claims["email"].(string)
+	return u.Claims["eMail"].(string)
 }
 
 func (u TestUser) Username() string {
-	return u.Claims["username"].(string)
+	return u.Claims["userName"].(string)
 }
 
 func (u TestUser) IsAdmin() bool {
@@ -51,7 +51,7 @@ func (u TestUser) Set(req *http.Request) error {
 	return nil
 }
 
-func GetTestUserIdentity() UserIdentity {
+func GetTestUserIdentity() TestUser {
 	return TestUser{
 		Claims: map[string]any{
 			"partner": "PARTNER-X",
@@ -61,8 +61,8 @@ func GetTestUserIdentity() UserIdentity {
 			},
 			"firstName": "John",
 			"surName":   "Rocket",
-			"email":     "j.rocket@example.com",
-			"username":  "jrocket",
+			"eMail":     "j.rocket@example.com",
+			"userName":  "jrocket",
 			"admin":     false,
 			"developer": false,
 		},
