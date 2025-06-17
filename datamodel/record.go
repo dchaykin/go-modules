@@ -19,6 +19,7 @@ type Metadata struct {
 type Record struct {
 	Metadata Metadata       `bson:"metadata"`
 	Fields   map[string]any `json:"entity" bson:"entity"`
+	Mapper   map[string]any `json:"mapper" bson:"mapper"`
 }
 
 func (r *Record) SetMetadata(userIdentity auth.UserIdentity, subject string) {
