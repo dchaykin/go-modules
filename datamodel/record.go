@@ -16,10 +16,15 @@ type Metadata struct {
 	Role      string    `bson:"role"`
 }
 
+type Mapper struct {
+	Cmbs     map[string]any `json:"cmbs" bson:"cmbs"`
+	Richtext map[string]any `json:"richtext" bson:"richtext"`
+}
+
 type Record struct {
 	Metadata Metadata       `bson:"metadata"`
 	Fields   map[string]any `json:"entity" bson:"entity"`
-	Mapper   map[string]any `json:"mapper" bson:"mapper"`
+	Mapper   Mapper         `json:"mapper" bson:"mapper"`
 }
 
 func (r *Record) SetMetadata(userIdentity auth.UserIdentity, subject string) {
