@@ -27,10 +27,10 @@ type Record struct {
 	Mapper   Mapper         `json:"mapper" bson:"mapper"`
 }
 
-func (r *Record) SetMetadata(userIdentity auth.UserIdentity, subject string) {
+func (r *Record) SetMetadata(userIdentity auth.UserIdentity, appName string) {
 	r.Metadata.Timestamp = time.Now()
 	r.Metadata.Partner = userIdentity.Partner()
-	r.Metadata.Role = userIdentity.RoleBySubject(subject)
+	r.Metadata.Role = userIdentity.RoleByApp(appName)
 	r.Metadata.User = userIdentity.Username()
 }
 
@@ -116,7 +116,7 @@ func GetErrorResponse(err error) *httpcomm.ServiceResponse {
 	return &result
 }
 
-func GetDomainConfig(r *http.Request, configPath, subject string) (*httpcomm.ServiceResponse, int) {
+func GetDomainConfig(r *http.Request, configPath, appName string) (*httpcomm.ServiceResponse, int) {
 	tenant, version, err := httpcomm.GetTenantVersionFromRequest(r)
 	if err != nil {
 		return GetErrorResponse(err), http.StatusBadRequest
@@ -128,12 +128,12 @@ func GetDomainConfig(r *http.Request, configPath, subject string) (*httpcomm.Ser
 	}
 
 	path := fmt.Sprintf("%s/%s", configPath, tenant)
-	tenantConfig, err := LoadDataModelByRole(path, userIdentity.RoleBySubject(subject), version)
+	tenantConfig, err := LoadDataModelByRole(path, userIdentity.RoleByApp(appName), version)
 	if err != nil {
 		return GetErrorResponse(err), http.StatusInternalServerError
 	}
 
-	domainEntity := tenantConfig.DataModel[subject]
+	domainEntity := tenantConfig.DataModel[appName]
 	uuid, err := GenerateUUID()
 	if err != nil {
 		return GetErrorResponse(err), http.StatusInternalServerError

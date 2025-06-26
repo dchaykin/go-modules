@@ -14,7 +14,8 @@ import (
 type UserIdentity interface {
 	Partner() string
 	Tenant() string
-	RoleBySubject(subject string) string
+	RoleByApp(appName string) string
+	Apps() []string
 	FirstName() string
 	SurName() string
 	Email() string
@@ -38,18 +39,32 @@ func (j userToken) Partner() string {
 	return claim.(string)
 }
 
-func (j userToken) RoleBySubject(subject string) string {
+func (j userToken) RoleByApp(appName string) string {
 	rolesClaim, ok := j.Claims["roles"]
 	if !ok {
 		log.Warn("User has no roles")
 		return ""
 	}
 	roles := rolesClaim.(map[string]any)
-	if result, ok := roles[subject]; ok {
+	if result, ok := roles[appName]; ok {
 		return fmt.Sprintf("%v", result)
 	}
-	log.Warn("User has no role %s. Available roles: %v", subject, rolesClaim)
+	log.Warn("User has no role for %s. Available roles: %v", appName, rolesClaim)
 	return ""
+}
+
+func (j userToken) Apps() []string {
+	rolesClaim, ok := j.Claims["roles"]
+	if !ok {
+		log.Warn("User has no roles")
+		return nil
+	}
+	apps := []string{}
+	roles := rolesClaim.(map[string]any)
+	for app := range roles {
+		apps = append(apps, fmt.Sprintf("%v", app))
+	}
+	return apps
 }
 
 func (j userToken) tenantList() []string {
@@ -59,7 +74,7 @@ func (j userToken) tenantList() []string {
 		return []string{}
 	}
 	result := []string{}
-	for _, v := range claim.([]interface{}) {
+	for _, v := range claim.([]any) {
 		result = append(result, fmt.Sprintf("%v", v))
 	}
 	return result
