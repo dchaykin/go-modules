@@ -1,0 +1,56 @@
+{
+		"config": [
+			{
+				"name": "dashboard",
+				"route": "/dashboard",
+				"icon": "dashboard-icon"
+			},
+			{
+				"name": "partner",
+				"icon": "partner-icon",
+				"items": [
+					{
+						"name": "overview",
+						"route": "/overview/partner"
+					},
+					{
+						"name": "input",
+						"route": "/create/partner"
+					},
+					{
+						"name": "search",
+						"route": "/search"
+					}
+				]
+			},
+			{
+				"name": "settings",
+				"icon": "settings-icon",
+				"items": [
+					{
+						"name": "profile",
+						"route": "/settings/profile"
+					},
+					{
+						"name": "preferences",
+						"route": "/settings/preferences"
+					}
+				]
+			}
+		],
+		"roles": {
+			"default": {
+				"menu": {
+					"dashboard": null,
+					"partner": [ "overview", "search" ]
+				}
+			},
+			"customer": {
+				"menu": {
+					"dashboard": null,
+					"partner": [ "input" ],
+					"settings": [ "preferences" ]
+				}
+			}
+		}
+	}
