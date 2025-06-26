@@ -18,9 +18,18 @@ func (u TestUser) Tenant() string {
 	return u.CurrentTenant
 }
 
-func (u TestUser) RoleBySubject(subject string) string {
+func (u TestUser) RoleByApp(appName string) string {
 	roles := u.Claims["roles"].(map[string]any)
-	return fmt.Sprintf("%v", roles[subject])
+	return fmt.Sprintf("%v", roles[appName])
+}
+
+func (u TestUser) Apps() []string {
+	roles := u.Claims["roles"].(map[string]any)
+	apps := []string{}
+	for app := range roles {
+		apps = append(apps, fmt.Sprintf("%v", app))
+	}
+	return apps
 }
 
 func (u TestUser) FirstName() string {
