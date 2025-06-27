@@ -3,7 +3,11 @@ package datamodel
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
+
+	"github.com/dchaykin/go-modules/auth"
+	"github.com/dchaykin/go-modules/httpcomm"
 )
 
 type Menu struct {
@@ -119,4 +123,36 @@ func (mc MenuConfig) filterMenuItems(menu Menu) []MenuItemConfig {
 	}
 
 	return result
+}
+
+func GetMenuItemsFromRequest(w http.ResponseWriter, r *http.Request, appName string) {
+	tenant, version, err := httpcomm.GetTenantVersionFromRequest(r)
+	if err != nil {
+		httpcomm.SetResponseError(&w, "", err, http.StatusBadRequest)
+		return
+	}
+
+	userIdentity, err := auth.GetUserIdentityFromRequest(*r)
+	if err != nil {
+		httpcomm.SetResponseError(&w, "", err, http.StatusUnauthorized)
+		return
+	}
+
+	subPath := ""
+	if appName != "" {
+		subPath = appName + "/"
+	}
+
+	mc := MenuConfig{}
+	err = mc.ReadFromFile("config/"+subPath+tenant, version)
+	if err != nil {
+		httpcomm.SetResponseError(&w, "", err, http.StatusInternalServerError)
+		return
+	}
+
+	result := mc.CreateMenuByRole(userIdentity.RoleByApp(appName))
+
+	httpcomm.ServiceResponse{
+		Data: result,
+	}.WriteData(w, httpcomm.PayloadFormatJSON)
 }
