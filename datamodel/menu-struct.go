@@ -125,7 +125,7 @@ func (mc MenuConfig) filterMenuItems(menu Menu) []MenuItemConfig {
 	return result
 }
 
-func GetMenuItemsFromRequest(w http.ResponseWriter, r *http.Request, appName string) {
+func GetMenuItemsFromRequest(w http.ResponseWriter, r *http.Request, appName, subPath string) {
 	tenant, version, err := httpcomm.GetTenantVersionFromRequest(r)
 	if err != nil {
 		httpcomm.SetResponseError(&w, "", err, http.StatusBadRequest)
@@ -138,13 +138,8 @@ func GetMenuItemsFromRequest(w http.ResponseWriter, r *http.Request, appName str
 		return
 	}
 
-	subPath := ""
-	if appName != "" {
-		subPath = appName + "/"
-	}
-
 	mc := MenuConfig{}
-	err = mc.ReadFromFile("config/"+subPath+tenant, version)
+	err = mc.ReadFromFile("config/"+subPath+"/"+tenant, version)
 	if err != nil {
 		httpcomm.SetResponseError(&w, "", err, http.StatusInternalServerError)
 		return
