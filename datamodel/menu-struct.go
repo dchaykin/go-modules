@@ -138,8 +138,12 @@ func GetMenuItemsFromRequest(w http.ResponseWriter, r *http.Request, appName, su
 		return
 	}
 
+	if subPath != "" {
+		subPath += "/"
+	}
+
 	mc := MenuConfig{}
-	err = mc.ReadFromFile("config/"+subPath+"/"+tenant, version)
+	err = mc.ReadFromFile("config/"+subPath+tenant, version)
 	if err != nil {
 		httpcomm.SetResponseError(&w, "", err, http.StatusInternalServerError)
 		return
