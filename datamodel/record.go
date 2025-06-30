@@ -3,6 +3,7 @@ package datamodel
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/dchaykin/go-modules/auth"
@@ -141,4 +142,68 @@ func GetDomainConfig(r *http.Request, configPath, appName string) (*httpcomm.Ser
 	domainEntity.SetValue("uuid", uuid)
 
 	return &httpcomm.ServiceResponse{Data: tenantConfig}, http.StatusOK
+}
+
+func (r *Record) ApplyMapper() {
+	r.applyMapper(0, r.Fields, r.Mapper.Cmbs, nil)
+	r.applyMapper(0, r.Fields, r.Mapper.Richtext, nil)
+}
+
+type onFoundNewMapping func(key string, indexStr string, oldValue any, newValue any) any
+
+func (r *Record) applyMapper(index int, fields map[string]any, mapper map[string]any, callback onFoundNewMapping) {
+	for key, mapping := range mapper {
+		subMap, ok := mapping.(map[string]any)
+		if !ok {
+			continue
+		}
+
+		fieldVal, fieldExists := fields[key]
+		if !fieldExists {
+			continue
+		}
+
+		switch fv := fieldVal.(type) {
+		case map[string]any:
+			// z. B. entity["foo"] → {"bar": ..., "x": ...}
+			r.applyMapper(index, fv, subMap, callback)
+
+		case []any:
+			// z. B. entity["style"] → []map[string]any
+			for x, item := range fv {
+				if m, ok := item.(map[string]any); ok {
+					r.applyMapper(x, m, subMap, callback)
+				}
+			}
+		default:
+			indexStr := fmt.Sprintf("%d", index)
+			// Basiswert: versuche, passenden Mapper-Eintrag zu finden
+			keyStr := toKeyString(fv)
+			newVal, ok := subMap[keyStr]
+			if !ok {
+				newVal, ok = subMap[indexStr]
+			}
+			if ok {
+				if callback != nil {
+					newVal = callback(key, indexStr, fv, newVal)
+				}
+				fields[key] = newVal
+			}
+		}
+	}
+}
+
+func toKeyString(value any) string {
+	switch v := value.(type) {
+	case string:
+		return v
+	case float64:
+		return strconv.FormatFloat(v, 'f', -1, 64)
+	case int:
+		return strconv.Itoa(v)
+	case bool:
+		return strconv.FormatBool(v)
+	default:
+		return fmt.Sprintf("%v", v)
+	}
 }
