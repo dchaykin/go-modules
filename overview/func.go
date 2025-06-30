@@ -67,7 +67,7 @@ func CreateOverview(w http.ResponseWriter, r *http.Request, appName, subPath str
 		subPath += "/"
 	}
 
-	configPath := "config/" + subPath + tenant
+	configPath := os.Getenv("ASSETS_PATH") + "config/" + subPath + tenant
 
 	tc, err := datamodel.LoadDataModelByRole(configPath, roleName, version)
 	if err != nil {
