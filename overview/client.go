@@ -12,7 +12,7 @@ import (
 	"github.com/dchaykin/go-modules/log"
 )
 
-func ConfigureOverview(userIdentity auth.UserIdentity, tenantConfig datamodel.TenantConfig, tenant, userRole string) error {
+func configureOverview(userIdentity auth.UserIdentity, tenantConfig datamodel.TenantConfig, tenant, userRole string) error {
 	payload, err := json.Marshal(tenantConfig)
 	if err != nil {
 		return err
