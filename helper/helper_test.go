@@ -64,6 +64,9 @@ func (de testDomainEntity) OverviewRow() map[string]any {
 	return nil
 }
 
+func (de *testDomainEntity) CleanNil() {
+}
+
 func TestEnsureUUID(t *testing.T) {
 	doc := testDomainEntity{}
 
@@ -89,7 +92,7 @@ func TestCleanNil(t *testing.T) {
 	err := json.Unmarshal([]byte(testJsonRecord), &rec)
 	require.NoError(t, err)
 
-	rec.Fields = CleanNil(rec.Fields)
+	rec.CleanNil()
 
 	expected := map[string]any{}
 	err = json.Unmarshal([]byte(`{"foo":{"boz":234,"bar":[{"baz":1},{"baz":2}],"foz":123}}`), &expected)

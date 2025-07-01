@@ -19,6 +19,7 @@ type DomainEntity interface {
 	OverviewRow() map[string]any
 	SetMetadata(userIdentity auth.UserIdentity, subject string)
 	GetAccessConfig() []AccessConfig
+	CleanNil()
 }
 
 type DomainItemList []any

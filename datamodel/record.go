@@ -2,7 +2,6 @@ package datamodel
 
 import (
 	"fmt"
-	"net/http"
 	"strconv"
 	"time"
 
@@ -26,6 +25,59 @@ type Record struct {
 	Metadata Metadata       `bson:"metadata"`
 	Fields   map[string]any `json:"entity" bson:"entity"`
 	Mapper   Mapper         `json:"mapper" bson:"mapper"`
+}
+
+func (r *Record) CleanNil() {
+	r.Fields = r.cleanNil(r.Fields)
+}
+
+func (r *Record) cleanNil(data map[string]any) map[string]any {
+	cleaned := make(map[string]any)
+	for k, v := range data {
+		if v == nil {
+			continue
+		}
+
+		switch val := v.(type) {
+		case map[string]any:
+			nested := r.cleanNil(val)
+			if len(nested) > 0 {
+				cleaned[k] = nested
+			}
+		case []any:
+			cleanedSlice := r.cleanSlice(val)
+			if len(cleanedSlice) > 0 {
+				cleaned[k] = cleanedSlice
+			}
+		default:
+			cleaned[k] = v
+		}
+	}
+	return cleaned
+}
+
+func (r *Record) cleanSlice(slice []any) []any {
+	result := make([]any, 0, len(slice))
+	for _, v := range slice {
+		if v == nil {
+			continue
+		}
+		switch val := v.(type) {
+		case map[string]any:
+			cleaned := r.cleanNil(val)
+			if len(cleaned) > 0 {
+				result = append(result, cleaned)
+			}
+		case []any:
+			nested := r.cleanSlice(val)
+			if len(nested) > 0 {
+				result = append(result, nested)
+			}
+		default:
+			result = append(result, v)
+		}
+	}
+	return result
 }
 
 func (r *Record) SetMetadata(userIdentity auth.UserIdentity, appName string) {
@@ -115,33 +167,6 @@ func GetErrorResponse(err error) *httpcomm.ServiceResponse {
 	result := httpcomm.ServiceResponse{Error: new(string)}
 	*result.Error = fmt.Sprintf("%v", err)
 	return &result
-}
-
-func GetDomainConfig(r *http.Request, configPath, appName string) (*httpcomm.ServiceResponse, int) {
-	tenant, version, err := httpcomm.GetTenantVersionFromRequest(r)
-	if err != nil {
-		return GetErrorResponse(err), http.StatusBadRequest
-	}
-
-	userIdentity, err := auth.GetUserIdentityFromRequest(*r)
-	if err != nil {
-		return GetErrorResponse(err), http.StatusUnauthorized
-	}
-
-	path := fmt.Sprintf("%s/%s", configPath, tenant)
-	tenantConfig, err := LoadDataModelByRole(path, userIdentity.RoleByApp(appName), version)
-	if err != nil {
-		return GetErrorResponse(err), http.StatusInternalServerError
-	}
-
-	domainEntity := tenantConfig.DataModel[appName]
-	uuid, err := GenerateUUID()
-	if err != nil {
-		return GetErrorResponse(err), http.StatusInternalServerError
-	}
-	domainEntity.SetValue("uuid", uuid)
-
-	return &httpcomm.ServiceResponse{Data: tenantConfig}, http.StatusOK
 }
 
 func (r *Record) ApplyMapper() {

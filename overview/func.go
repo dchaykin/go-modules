@@ -12,7 +12,7 @@ import (
 	"github.com/dchaykin/go-modules/log"
 )
 
-func configureOverview(userIdentity auth.UserIdentity, tenantConfig datamodel.TenantConfig, tenant, userRole string) error {
+func ConfigureOverview(userIdentity auth.UserIdentity, tenantConfig datamodel.TenantConfig, tenant, userRole string) error {
 	payload, err := json.Marshal(tenantConfig)
 	if err != nil {
 		return err
@@ -46,40 +46,4 @@ func UpdateOverviewRow(userIdentity auth.UserIdentity, domainEntity datamodel.Do
 	}
 
 	return nil
-}
-
-func CreateOverview(w http.ResponseWriter, r *http.Request, appName, subPath string) {
-	tenant, version, err := httpcomm.GetTenantVersionFromRequest(r)
-	if err != nil {
-		httpcomm.SetResponseError(&w, "", err, http.StatusBadRequest)
-		return
-	}
-
-	userIdentity, err := auth.GetUserIdentityFromRequest(*r)
-	if err != nil {
-		httpcomm.SetResponseError(&w, "", err, http.StatusUnauthorized)
-		return
-	}
-
-	roleName := userIdentity.RoleByApp(appName)
-
-	if subPath != "" {
-		subPath += "/"
-	}
-
-	configPath := os.Getenv("ASSETS_PATH") + "config/" + subPath + tenant
-
-	tc, err := datamodel.LoadDataModelByRole(configPath, roleName, version)
-	if err != nil {
-		httpcomm.SetResponseError(&w, "", err, http.StatusInternalServerError)
-		return
-	}
-
-	err = configureOverview(userIdentity, *tc, tenant, roleName)
-	if err != nil {
-		httpcomm.SetResponseError(&w, "", err, http.StatusInternalServerError)
-		return
-	}
-
-	httpcomm.ServiceResponse{}.WriteData(w, httpcomm.PayloadFormatJSON)
 }

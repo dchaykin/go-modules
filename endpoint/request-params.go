@@ -1,4 +1,4 @@
-package httpcomm
+package endpoint
 
 import (
 	"net/http"
