@@ -5,7 +5,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/dchaykin/go-modules/auth"
 	"github.com/dchaykin/go-modules/datamodel"
 	"github.com/stretchr/testify/require"
 )
@@ -28,16 +27,7 @@ const testJsonRecord = `{
 		}`
 
 type testDomainEntity struct {
-	ID   string
-	Data map[string]interface{}
-}
-
-func (de testDomainEntity) UUID() string {
-	return de.ID
-}
-
-func (de *testDomainEntity) SetUUID(uuid string) {
-	de.ID = uuid
+	datamodel.Record
 }
 
 func (de testDomainEntity) DatabaseName() string {
@@ -48,14 +38,6 @@ func (de testDomainEntity) CollectionName() string {
 	return "test"
 }
 
-func (de testDomainEntity) Entity() map[string]any {
-	return de.Data
-}
-
-func (de *testDomainEntity) SetMetadata(userIdentity auth.UserIdentity, subject string) {
-
-}
-
 func (de *testDomainEntity) GetAccessConfig() []datamodel.AccessConfig {
 	return nil
 }
@@ -64,7 +46,8 @@ func (de testDomainEntity) OverviewRow() map[string]any {
 	return nil
 }
 
-func (de *testDomainEntity) CleanNil() {
+func (de testDomainEntity) BeforeSave() error {
+	return nil
 }
 
 func TestEnsureUUID(t *testing.T) {

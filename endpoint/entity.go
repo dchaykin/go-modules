@@ -169,6 +169,11 @@ func saveEntity(domainEntity datamodel.DomainEntity) error {
 		return fmt.Errorf("unable to generate a uuid: %v", err)
 	}
 
+	err = domainEntity.BeforeSave()
+	if err != nil {
+		return err
+	}
+
 	session, err := database.OpenSession()
 	if err != nil {
 		return log.WrapError(err)

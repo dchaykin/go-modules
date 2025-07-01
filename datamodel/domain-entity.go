@@ -20,6 +20,7 @@ type DomainEntity interface {
 	SetMetadata(userIdentity auth.UserIdentity, subject string)
 	GetAccessConfig() []AccessConfig
 	CleanNil()
+	BeforeSave() error
 }
 
 type DomainItemList []any
