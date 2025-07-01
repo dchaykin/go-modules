@@ -96,7 +96,7 @@ func (tc *TenantConfig) buildRole(roleConfig roleFiles, roleName string, isReado
 		for recordName, recordConfig := range fields {
 			record, ok := tc.DataModel[recordName]
 			if !ok {
-				return fmt.Errorf("record config %s for role %s exists, but no record was found in datamodel", recordName, roleName)
+				continue
 			}
 			for fieldName, fieldConfig := range recordConfig {
 				field, ok := record[fieldName]
