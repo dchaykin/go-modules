@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/dchaykin/go-modules/datamodel"
 	"github.com/dchaykin/go-modules/log"
@@ -47,4 +48,16 @@ func ValueString(fields map[string]any, fieldName string) string {
 		return ""
 	}
 	return fmt.Sprintf("%s", value)
+}
+
+func FloatFromString(value string) float64 {
+	if value == "" {
+		return 0
+	}
+	result, err := strconv.ParseFloat(value, 64)
+	if err == nil {
+		return result
+	}
+	log.Errorf("Could not parse %s into float: %v", value, err)
+	return 0
 }

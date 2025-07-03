@@ -31,7 +31,7 @@ func (hr *HTTPResult) GetError() error {
 			return nil
 		}
 	}
-	return fmt.Errorf("%s-error. URL: %s, Status Code: %d, Status Msg: %s", hr.method, hr.GetURL(), hr.StatusCode, hr.Status)
+	return fmt.Errorf("%s %s: %s (%d)", hr.method, hr.GetURL(), hr.Status, hr.StatusCode)
 }
 
 func (hr *HTTPResult) GetURL() string {
