@@ -28,7 +28,7 @@ func ConfigureOverview(userIdentity auth.UserIdentity, tenantConfig datamodel.Te
 	return nil
 }
 
-func UpdateOverviewRow(userIdentity auth.UserIdentity, domainEntity datamodel.DomainEntity) error {
+func UpdateOverviewRow(userIdentity auth.UserIdentity, appName string, domainEntity datamodel.DomainEntity) error {
 	data := DataRecord{
 		Row:    domainEntity.OverviewRow(),
 		Access: domainEntity.GetAccessConfig(),
@@ -39,7 +39,7 @@ func UpdateOverviewRow(userIdentity auth.UserIdentity, domainEntity datamodel.Do
 		return log.WrapError(err)
 	}
 
-	endpoint := fmt.Sprintf("https://%s/app-overview/api/save/%s", os.Getenv("MYHOST"), domainEntity.CollectionName())
+	endpoint := fmt.Sprintf("https://%s/app-overview/api/save/%s/%s", os.Getenv("MYHOST"), appName, domainEntity.CollectionName())
 	resp := httpcomm.Post(endpoint, userIdentity, nil, string(payload))
 	if resp.StatusCode != http.StatusOK {
 		return resp.GetError()

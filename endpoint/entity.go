@@ -123,7 +123,7 @@ func loadDomainEntityByUUID(uuid string, domainEntity datamodel.DomainEntity) er
 	return nil
 }
 
-func CreateEntity(w http.ResponseWriter, r *http.Request, domainEntity datamodel.DomainEntity, subject string) {
+func CreateEntity(w http.ResponseWriter, r *http.Request, domainEntity datamodel.DomainEntity, appName, subject string) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		httpcomm.SetResponseError(&w, "Unable to fetch payload from body", err, http.StatusBadRequest)
@@ -153,7 +153,7 @@ func CreateEntity(w http.ResponseWriter, r *http.Request, domainEntity datamodel
 		return
 	}
 
-	err = overview.UpdateOverviewRow(userIdentity, domainEntity)
+	err = overview.UpdateOverviewRow(userIdentity, appName, domainEntity)
 	if err != nil {
 		httpcomm.SetResponseError(&w, fmt.Sprintf("could not create or update an overview row. UUID: %s", domainEntity.UUID()), err, http.StatusInternalServerError)
 		return
