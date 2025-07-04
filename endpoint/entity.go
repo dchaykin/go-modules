@@ -48,34 +48,39 @@ func GetMenuItemsFromRequest(w http.ResponseWriter, r *http.Request, appName, su
 	}.WriteData(w, httpcomm.PayloadFormatJSON)
 }
 
-func GetDomainConfig(w http.ResponseWriter, r *http.Request, configPath, appName string) {
+func GetTenantConfig(w http.ResponseWriter, r *http.Request, configPath, appName string) *datamodel.TenantConfig {
 	tenant, version, err := GetTenantVersionFromRequest(r)
 	if err != nil {
 		httpcomm.SetResponseError(&w, "", err, http.StatusBadRequest)
-		return
+		return nil
 	}
 
 	userIdentity, err := auth.GetUserIdentityFromRequest(*r)
 	if err != nil {
 		httpcomm.SetResponseError(&w, "", err, http.StatusUnauthorized)
-		return
+		return nil
 	}
 
 	path := fmt.Sprintf("%s/%s", configPath, tenant)
 	tenantConfig, err := datamodel.LoadDataModelByRole(path, userIdentity.RoleByApp(appName), version)
 	if err != nil {
 		httpcomm.SetResponseError(&w, "", err, http.StatusInternalServerError)
-		return
+		return nil
 	}
 
 	domainEntity := tenantConfig.DataModel[appName]
 	uuid, err := datamodel.GenerateUUID()
 	if err != nil {
 		httpcomm.SetResponseError(&w, "", err, http.StatusInternalServerError)
-		return
+		return nil
 	}
 	domainEntity.SetValue("uuid", uuid)
 
+	return tenantConfig
+}
+
+func GetDomainConfig(w http.ResponseWriter, r *http.Request, configPath, appName string) {
+	tenantConfig := GetTenantConfig(w, r, configPath, appName)
 	httpcomm.ServiceResponse{
 		Data: tenantConfig,
 	}.WriteData(w, httpcomm.PayloadFormatJSON)
@@ -90,7 +95,7 @@ func GetDomainEntityByUUID(w http.ResponseWriter, r *http.Request, domainEntity 
 		return
 	}
 
-	err := loadDomainEntityByUUID(uuid, domainEntity)
+	err := database.GetDomainEntityByUUID(uuid, domainEntity)
 	if err != nil {
 		httpcomm.SetResponseError(&w, "", err, http.StatusInternalServerError)
 		return
@@ -104,23 +109,6 @@ func GetDomainEntityByUUID(w http.ResponseWriter, r *http.Request, domainEntity 
 	httpcomm.ServiceResponse{
 		Data: domainEntity.Entity(),
 	}.WriteData(w, httpcomm.PayloadFormatJSON)
-}
-
-func loadDomainEntityByUUID(uuid string, domainEntity datamodel.DomainEntity) error {
-	session, err := database.OpenSession()
-	if err != nil {
-		return err
-	}
-	defer session.Close()
-
-	bFound, err := session.GetEntityByUUID(uuid, domainEntity)
-	if err != nil {
-		return err
-	}
-	if !bFound {
-		return fmt.Errorf("no record with UUID %s found", uuid)
-	}
-	return nil
 }
 
 func CreateEntity(w http.ResponseWriter, r *http.Request, domainEntity datamodel.DomainEntity, appName, subject string) {
