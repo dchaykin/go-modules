@@ -79,13 +79,6 @@ func GetTenantConfig(w http.ResponseWriter, r *http.Request, configPath, appName
 	return tenantConfig
 }
 
-func GetDomainConfig(w http.ResponseWriter, r *http.Request, configPath, appName string) {
-	tenantConfig := GetTenantConfig(w, r, configPath, appName)
-	httpcomm.ServiceResponse{
-		Data: tenantConfig,
-	}.WriteData(w, httpcomm.PayloadFormatJSON)
-}
-
 func GetDomainEntityByUUID(w http.ResponseWriter, r *http.Request, domainEntity datamodel.DomainEntity) {
 	vars := mux.Vars(r)
 	uuid := vars["uuid"]
