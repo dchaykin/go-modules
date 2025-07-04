@@ -7,6 +7,7 @@ import (
 	"github.com/dchaykin/go-modules/auth"
 	"github.com/dchaykin/go-modules/datamodel"
 	"github.com/dchaykin/go-modules/httpcomm"
+	"github.com/dchaykin/go-modules/log"
 	"github.com/dchaykin/go-modules/overview"
 )
 
@@ -35,6 +36,8 @@ func CreateOverview(w http.ResponseWriter, r *http.Request, subPath string) {
 	}
 
 	for _, role := range roles {
+		log.Info("Creating overview for tenant %s, role %s, version %d", tenant, role, version)
+
 		tc, err := datamodel.LoadDataModelByRole(configPath, role, version)
 		if err != nil {
 			httpcomm.SetResponseError(&w, "", err, http.StatusInternalServerError)

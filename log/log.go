@@ -16,6 +16,20 @@ const (
 
 var logger = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 
+func init() {
+	logLevel := strings.ToLower(os.Getenv("LOG_LEVEL"))
+	switch logLevel {
+	case "debug":
+		SetLevel(LevelDebug)
+	case "warn":
+		SetLevel(LevelWarn)
+	case "error":
+		SetLevel(LevelError)
+	default:
+		SetLevel(LevelInfo)
+	}
+}
+
 func SetLevel(level int) {
 	l := slog.LevelInfo
 	switch level {
