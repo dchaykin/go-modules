@@ -68,7 +68,9 @@ func GetTenantConfig(w http.ResponseWriter, r *http.Request, configPath, appName
 		return nil
 	}
 
-	domainEntity := tenantConfig.DataModel[appName]
+	log.Debug("Loaded tenant config for %s, version %d, app %s, subject %s", tenant, tenantConfig.Version, appName, tenantConfig.Subject)
+
+	domainEntity := tenantConfig.DataModel[tenantConfig.Subject]
 	uuid, err := datamodel.GenerateUUID()
 	if err != nil {
 		httpcomm.SetResponseError(&w, "", err, http.StatusInternalServerError)
