@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/dchaykin/go-modules/log"
 )
 
 const (
@@ -229,6 +231,25 @@ func ReadPrefix(path, key string, version int) string {
 		return ""
 	}
 	return tc.GetPrefix(key)
+}
+
+func GetRoles(path string, version int) ([]string, error) {
+	tc, err := loadDataModelFromFile(path, version)
+	if err != nil {
+		return nil, err
+	}
+
+	if tc.Roles == nil {
+		log.Warn("No roles found in the data model at path %s, using default role", path)
+		return []string{"default"}, nil
+	}
+
+	roles := make([]string, 0, len(*tc.Roles))
+	for roleName := range *tc.Roles {
+		roles = append(roles, roleName)
+	}
+
+	return roles, nil
 }
 
 func LoadDataModelByRole(path, roleName string, version int) (*TenantConfig, error) {
