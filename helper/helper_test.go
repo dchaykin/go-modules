@@ -50,6 +50,10 @@ func (de testDomainEntity) BeforeSave() error {
 	return nil
 }
 
+func (de testDomainEntity) CreateEmpty() datamodel.DomainEntity {
+	return &testDomainEntity{}
+}
+
 func TestEnsureUUID(t *testing.T) {
 	doc := testDomainEntity{}
 

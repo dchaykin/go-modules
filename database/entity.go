@@ -25,7 +25,7 @@ func GetDomainEntityByUUID(uuid string, domainEntity datamodel.DomainEntity) err
 	return nil
 }
 
-func ReadDomainEntities(session DatabaseSession, coll Collection, offset, limit int64) ([]datamodel.Record, error) {
+func ReadDomainEntities(session DatabaseSession, coll Collection, domainEntity datamodel.DomainEntity, offset, limit int64) ([]datamodel.DomainEntity, error) {
 	dataList := []any{}
 	sortOpt := bson.D{{Key: "uuid", Value: 1}}
 	count, err := session.Extract(coll, nil, &dataList, sortOpt, offset, limit)
@@ -35,21 +35,21 @@ func ReadDomainEntities(session DatabaseSession, coll Collection, offset, limit 
 	if count == 0 {
 		return nil, nil
 	}
-	resultList, err := convertToDomainEntities(dataList)
+	resultList, err := convertToDomainEntities(dataList, domainEntity)
 	return resultList, log.WrapError(err)
 }
 
-func convertToDomainEntities(sourceList []any) (resultList []datamodel.Record, err error) {
+func convertToDomainEntities(sourceList []any, domainEntity datamodel.DomainEntity) (resultList []datamodel.DomainEntity, err error) {
 	for i, item := range sourceList {
 		o, err := bson.Marshal(item)
 		if err != nil {
-			return nil, err
+			return nil, log.WrapError(err)
 		}
 
-		var entity datamodel.Record
-		err = bson.Unmarshal(o, &entity)
+		entity := domainEntity.CreateEmpty()
+		err = bson.Unmarshal(o, entity)
 		if err != nil {
-			return nil, fmt.Errorf("failed to unmarshal item %d: %w", i, err)
+			return nil, log.WrapError(fmt.Errorf("failed to unmarshal item %d: %w", i, err))
 		}
 		resultList = append(resultList, entity)
 	}

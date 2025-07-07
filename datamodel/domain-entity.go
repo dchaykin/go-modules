@@ -13,6 +13,8 @@ import (
 type DomainEntity interface {
 	UUID() string
 	SetUUID(uuid string)
+	CreateEmpty() DomainEntity
+	SetValue(key string, value any)
 	DatabaseName() string
 	CollectionName() string
 	Entity() map[string]any

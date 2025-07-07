@@ -31,6 +31,10 @@ func (r *Record) CleanNil() {
 	r.Fields = r.cleanNil(r.Fields)
 }
 
+func (r *Record) SetValue(key string, value any) {
+	r.Fields[key] = value
+}
+
 func (r *Record) cleanNil(data map[string]any) map[string]any {
 	cleaned := make(map[string]any)
 	for k, v := range data {
