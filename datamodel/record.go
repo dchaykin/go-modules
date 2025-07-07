@@ -87,6 +87,10 @@ func (r *Record) SetMetadata(userIdentity auth.UserIdentity, appName string) {
 	r.Metadata.User = userIdentity.Username()
 }
 
+func (r *Record) BeforeSave() error {
+	return nil
+}
+
 type OnJsonArrayFound func(array []any)
 
 func (r *Record) FindJsonArray(jsonPath []string, f OnJsonArrayFound) {
