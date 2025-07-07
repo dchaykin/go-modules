@@ -60,13 +60,13 @@ func BulkInsertIntoOverview(userIdentity auth.UserIdentity, subject string, enti
 		return err
 	}
 
-	params := map[string]string{}
+	params := ""
 	if isTemporary {
-		params["temporary"] = "true"
+		params = "temporary=true"
 	}
 
-	endpoint := fmt.Sprintf("https://%s/app-overview/api/bulk-insert/%s", os.Getenv("MYHOST"), subject)
-	resp := httpcomm.Post(endpoint, userIdentity, params, string(payload))
+	endpoint := fmt.Sprintf("https://%s/app-overview/api/bulk-insert/%s?%s", os.Getenv("MYHOST"), subject, params)
+	resp := httpcomm.Post(endpoint, userIdentity, nil, string(payload))
 	if resp.StatusCode != http.StatusOK {
 		return resp.GetError()
 	}
