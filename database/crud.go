@@ -12,18 +12,18 @@ import (
 )
 
 type Collection interface {
-	insertOne(ctx context.Context, record interface{}) error
-	replaceOne(ctx context.Context, filter bson.M, replacement interface{}, allowInsert bool) error
+	insertOne(ctx context.Context, record any) error
+	replaceOne(ctx context.Context, filter bson.M, replacement any, allowInsert bool) error
 
 	updateEntity(ctx context.Context, doc datamodel.DomainEntity) error
-	updateOne(ctx context.Context, filter bson.M, doc interface{}) error
+	updateOne(ctx context.Context, filter bson.M, doc any) error
 
-	aggregate(ctx context.Context, match, group bson.M, result interface{}) error
+	aggregate(ctx context.Context, match, group bson.M, result any) error
 
-	findOne(ctx context.Context, filter bson.M, doc interface{}) (bool, error)
+	findOne(ctx context.Context, filter bson.M, doc any) (bool, error)
 	findEntity(ctx context.Context, filter bson.M, doc datamodel.DomainEntity) (bool, error)
-	findMany(ctx context.Context, filter bson.M, docList interface{}) error
-	findWithOptions(ctx context.Context, filter bson.M, result interface{}, sort bson.D, offset, limit int64) error
+	findMany(ctx context.Context, filter bson.M, docList any) error
+	findWithOptions(ctx context.Context, filter bson.M, result any, sort bson.D, offset, limit int64) error
 
 	get() *mongo.Collection
 
@@ -42,7 +42,7 @@ func (c mongoCollection) createIndex(ctx context.Context, mod mongo.IndexModel, 
 	return err
 }
 
-func (c mongoCollection) aggregate(ctx context.Context, match, group bson.M, result interface{}) error {
+func (c mongoCollection) aggregate(ctx context.Context, match, group bson.M, result any) error {
 	pipeline := []bson.M{
 		{
 			"$match": match,
@@ -62,7 +62,7 @@ func (c mongoCollection) aggregate(ctx context.Context, match, group bson.M, res
 	return nil
 }
 
-func (c mongoCollection) updateOne(ctx context.Context, filter bson.M, record interface{}) error {
+func (c mongoCollection) updateOne(ctx context.Context, filter bson.M, record any) error {
 	_, err := c.collection.UpdateOne(ctx, filter, bson.M{"$set": record})
 	if err != nil {
 		return err
@@ -70,7 +70,7 @@ func (c mongoCollection) updateOne(ctx context.Context, filter bson.M, record in
 	return nil
 }
 
-func (c mongoCollection) replaceOne(ctx context.Context, filter bson.M, replacement interface{}, allowInsert bool) error {
+func (c mongoCollection) replaceOne(ctx context.Context, filter bson.M, replacement any, allowInsert bool) error {
 	var opts *options.ReplaceOptions = nil
 	if allowInsert {
 		opts = &options.ReplaceOptions{}
@@ -83,7 +83,7 @@ func (c mongoCollection) replaceOne(ctx context.Context, filter bson.M, replacem
 	return nil
 }
 
-func (c mongoCollection) insertOne(ctx context.Context, record interface{}) error {
+func (c mongoCollection) insertOne(ctx context.Context, record any) error {
 	if _, err := c.collection.InsertOne(ctx, record); err != nil {
 		return err
 	}
@@ -129,7 +129,7 @@ func (c mongoCollection) findEntity(ctx context.Context, filter bson.M, doc data
 	return true, err
 }
 
-func (c mongoCollection) findOne(ctx context.Context, filter bson.M, doc interface{}) (found bool, err error) {
+func (c mongoCollection) findOne(ctx context.Context, filter bson.M, doc any) (found bool, err error) {
 	result := c.collection.FindOne(ctx, filter)
 	if err = result.Err(); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
@@ -145,7 +145,7 @@ func (c mongoCollection) findOne(ctx context.Context, filter bson.M, doc interfa
 	return true, err
 }
 
-func (c mongoCollection) findWithOptions(ctx context.Context, filter bson.M, result interface{}, sort bson.D, offset, limit int64) error {
+func (c mongoCollection) findWithOptions(ctx context.Context, filter bson.M, result any, sort bson.D, offset, limit int64) error {
 	findOpt := options.Find()
 	if offset != 0 {
 		findOpt.SetSkip(offset)
@@ -172,7 +172,7 @@ func (c mongoCollection) findWithOptions(ctx context.Context, filter bson.M, res
 	return nil
 }
 
-func (c mongoCollection) findMany(ctx context.Context, filter bson.M, result interface{}) error {
+func (c mongoCollection) findMany(ctx context.Context, filter bson.M, result any) error {
 	cursor, err := c.collection.Find(ctx, filter)
 	if err != nil {
 		return err
@@ -193,7 +193,7 @@ func (c mongoCollection) findMany(ctx context.Context, filter bson.M, result int
 	return nil
 }
 
-func (ms mongoSession) Extract(coll Collection, filter bson.M, result *[]interface{}, sort bson.D, offset, limit int64) (totalCount int64, err error) {
+func (ms mongoSession) Extract(coll Collection, filter bson.M, result *[]any, sort bson.D, offset, limit int64) (totalCount int64, err error) {
 	err = mongo.WithSession(context.Background(), ms.session, func(sc mongo.SessionContext) error {
 		totalCount, err = coll.get().CountDocuments(context.Background(), filter)
 		if err != nil {
@@ -204,14 +204,14 @@ func (ms mongoSession) Extract(coll Collection, filter bson.M, result *[]interfa
 	return totalCount, err
 }
 
-func (ms mongoSession) ReplaceOne(coll Collection, filter bson.M, replacement interface{}, allowInsert bool) (err error) {
+func (ms mongoSession) ReplaceOne(coll Collection, filter bson.M, replacement any, allowInsert bool) (err error) {
 	return mongo.WithSession(context.Background(), ms.session, func(sc mongo.SessionContext) error {
 		return coll.replaceOne(sc, filter, replacement, allowInsert)
 	})
 
 }
 
-func (ms mongoSession) UpdateOne(coll Collection, filter bson.M, doc interface{}) (err error) {
+func (ms mongoSession) UpdateOne(coll Collection, filter bson.M, doc any) (err error) {
 	return mongo.WithSession(context.Background(), ms.session, func(sc mongo.SessionContext) error {
 		return coll.updateOne(sc, filter, doc)
 	})
@@ -232,7 +232,7 @@ func (ms mongoSession) GetCollection(databaseName, collectionName string) Collec
 	}
 }
 
-func (ms mongoSession) InsertOne(coll Collection, record interface{}) error {
+func (ms mongoSession) InsertOne(coll Collection, record any) error {
 	return mongo.WithSession(context.Background(), ms.session, func(sc mongo.SessionContext) error {
 		return coll.insertOne(sc, record)
 	})
@@ -264,7 +264,7 @@ func (ms mongoSession) FindEntity(coll Collection, filter bson.M, doc datamodel.
 	return found, err
 }
 
-func (ms mongoSession) FindOne(coll Collection, filter bson.M, doc interface{}) (found bool, err error) {
+func (ms mongoSession) FindOne(coll Collection, filter bson.M, doc any) (found bool, err error) {
 	err = mongo.WithSession(context.Background(), ms.session, func(sc mongo.SessionContext) error {
 		found, err = coll.findOne(sc, filter, doc)
 		if err != nil {
@@ -276,7 +276,7 @@ func (ms mongoSession) FindOne(coll Collection, filter bson.M, doc interface{}) 
 	return found, err
 }
 
-func (ms mongoSession) FindMany(coll Collection, filter bson.M, docList interface{}) error {
+func (ms mongoSession) FindMany(coll Collection, filter bson.M, docList any) error {
 	err := mongo.WithSession(context.Background(), ms.session, func(sc mongo.SessionContext) error {
 		return coll.findMany(sc, filter, docList)
 	})
