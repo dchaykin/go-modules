@@ -4,12 +4,13 @@ import (
 	"net/http"
 
 	"github.com/dchaykin/go-modules/auth"
+	"github.com/dchaykin/go-modules/database"
 	"github.com/dchaykin/go-modules/datamodel"
 	"github.com/dchaykin/go-modules/httpcomm"
 	"github.com/dchaykin/go-modules/overview"
 )
 
-type OnNextBulkInsert func() ([]datamodel.DomainEntity, error)
+type OnNextBulkInsert func(session database.DatabaseSession) ([]datamodel.DomainEntity, error)
 
 func RebuildOverview(w http.ResponseWriter, r *http.Request, subject string, f OnNextBulkInsert) {
 	userIdentity, err := auth.GetUserIdentityFromRequest(*r)
@@ -30,8 +31,15 @@ func RebuildOverview(w http.ResponseWriter, r *http.Request, subject string, f O
 		return
 	}
 
+	session, err := database.OpenSession()
+	if err != nil {
+		httpcomm.SetResponseError(&w, "", err, http.StatusInternalServerError)
+		return
+	}
+	defer session.Close()
+
 	for {
-		recordList, err := f()
+		recordList, err := f(session)
 		if err != nil {
 			httpcomm.SetResponseError(&w, "", err, http.StatusInternalServerError)
 			return
