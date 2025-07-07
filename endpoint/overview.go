@@ -10,7 +10,7 @@ import (
 	"github.com/dchaykin/go-modules/overview"
 )
 
-type OnNextBulkInsert func(session database.DatabaseSession) ([]datamodel.DomainEntity, error)
+type OnNextBulkInsert func(session database.DatabaseSession, offset int) ([]datamodel.DomainEntity, error)
 
 func RebuildOverview(w http.ResponseWriter, r *http.Request, subject string, f OnNextBulkInsert) {
 	userIdentity, err := auth.GetUserIdentityFromRequest(*r)
@@ -38,8 +38,9 @@ func RebuildOverview(w http.ResponseWriter, r *http.Request, subject string, f O
 	}
 	defer session.Close()
 
+	offset := 0
 	for {
-		recordList, err := f(session)
+		recordList, err := f(session, offset)
 		if err != nil {
 			httpcomm.SetResponseError(&w, "", err, http.StatusInternalServerError)
 			return
@@ -48,6 +49,8 @@ func RebuildOverview(w http.ResponseWriter, r *http.Request, subject string, f O
 		if len(recordList) == 0 {
 			break // No more records to insert
 		}
+
+		offset += len(recordList)
 
 		err = overview.BulkInsertIntoOverview(userIdentity, subject, recordList, true)
 		if err != nil {
