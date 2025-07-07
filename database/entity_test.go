@@ -39,10 +39,9 @@ func TestReadDomainEntites(t *testing.T) {
 	require.NoError(t, err)
 	defer session.Close()
 
-	coll := session.GetCollection("masterData", "location")
 	offset := int64(0)
 
-	entities, err := ReadDomainEntities(session, coll, &location{}, offset, 3)
+	entities, err := ReadDomainEntities(session, &location{}, offset, 3)
 	require.NoError(t, err)
 	require.EqualValues(t, 3, len(entities), "Expected to read 3 entities from the collection.")
 
@@ -50,14 +49,14 @@ func TestReadDomainEntites(t *testing.T) {
 
 	offset += int64(len(entities))
 
-	entities, err = ReadDomainEntities(session, coll, &location{}, offset, 3)
+	entities, err = ReadDomainEntities(session, &location{}, offset, 3)
 	require.NoError(t, err)
 	require.Greater(t, len(entities), 0)
 	t.Logf("Found %d entities in the second transaction.", len(entities))
 
 	offset += int64(len(entities))
 
-	entities, err = ReadDomainEntities(session, coll, &location{}, offset, 3)
+	entities, err = ReadDomainEntities(session, &location{}, offset, 3)
 	require.NoError(t, err)
 	require.EqualValues(t, 0, len(entities))
 	t.Logf("No records to read in the third transaction.")

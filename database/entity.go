@@ -25,7 +25,8 @@ func GetDomainEntityByUUID(uuid string, domainEntity datamodel.DomainEntity) err
 	return nil
 }
 
-func ReadDomainEntities(session DatabaseSession, coll Collection, domainEntity datamodel.DomainEntity, offset, limit int64) ([]datamodel.DomainEntity, error) {
+func ReadDomainEntities(session DatabaseSession, domainEntity datamodel.DomainEntity, offset, limit int64) ([]datamodel.DomainEntity, error) {
+	coll := session.GetCollection(domainEntity.DatabaseName(), domainEntity.CollectionName())
 	dataList := []any{}
 	sortOpt := bson.D{{Key: "uuid", Value: 1}}
 	count, err := session.Extract(coll, nil, &dataList, sortOpt, offset, limit)
