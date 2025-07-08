@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type onCreateCombobox func(userIdentity auth.UserIdentity, subject string) (any, error)
+type onCreateCombobox func(userIdentity auth.UserIdentity, subject string, params map[string]string) (any, error)
 
 func GetComboboxBySubject(w http.ResponseWriter, r *http.Request, f onCreateCombobox) {
 	vars := mux.Vars(r)
@@ -25,7 +25,13 @@ func GetComboboxBySubject(w http.ResponseWriter, r *http.Request, f onCreateComb
 		return
 	}
 
-	combobox, err := f(userIdentity, subject)
+	params := make(map[string]string)
+	q := r.URL.Query()
+	for k := range q {
+		params[k] = q.Get(k)
+	}
+
+	combobox, err := f(userIdentity, subject, params)
 	if err != nil {
 		httpcomm.SetResponseError(&w, "", err, http.StatusInternalServerError)
 	}
