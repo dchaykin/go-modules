@@ -23,6 +23,9 @@ type DomainEntity interface {
 	GetAccessConfig() []AccessConfig
 	CleanNil()
 	BeforeSave() error
+
+	NormalizePrimitives()
+	ApplyMapper()
 }
 
 type DomainItemList []any

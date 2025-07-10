@@ -7,6 +7,7 @@ import (
 
 	"github.com/dchaykin/go-modules/auth"
 	"github.com/dchaykin/go-modules/httpcomm"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Metadata struct {
@@ -58,6 +59,24 @@ func (r *Record) cleanNil(data map[string]any) map[string]any {
 		}
 	}
 	return cleaned
+}
+
+func (r *Record) NormalizePrimitives() {
+	r.Fields = r.normalizePrimitives(r.Fields)
+}
+
+func (r *Record) normalizePrimitives(m map[string]any) map[string]any {
+	for k, v := range m {
+		switch val := v.(type) {
+		case primitive.A:
+			arr := make([]any, len(val))
+			copy(arr, val)
+			m[k] = arr
+		case map[string]any:
+			m[k] = r.normalizePrimitives(val)
+		}
+	}
+	return m
 }
 
 func (r *Record) cleanSlice(slice []any) []any {

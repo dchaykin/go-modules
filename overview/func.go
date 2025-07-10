@@ -46,6 +46,10 @@ func CreateTemporaryOverview(userIdentity auth.UserIdentity, version int, subPat
 func BulkInsertIntoOverview(userIdentity auth.UserIdentity, subject string, entityList []datamodel.DomainEntity, isTemporary bool) error {
 	recordList := []DataRecord{}
 	for _, entity := range entityList {
+
+		entity.NormalizePrimitives()
+		entity.ApplyMapper()
+
 		record := DataRecord{
 			Row:    entity.OverviewRow(),
 			Access: entity.GetAccessConfig(),
