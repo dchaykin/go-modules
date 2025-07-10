@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/dchaykin/go-modules/httpcomm"
+	"github.com/dchaykin/go-modules/log"
 	"github.com/gorilla/mux"
 )
 
@@ -16,8 +16,7 @@ func DownloadByLanguage(w http.ResponseWriter, r *http.Request, path string) {
 	dictionaryFile := fmt.Sprintf("%s/%s.csv", path, language)
 	content, err := os.ReadFile(dictionaryFile)
 	if err != nil {
-		httpcomm.SetResponseError(&w, "Unable to read the dictionary file: "+dictionaryFile, err, http.StatusInternalServerError)
-		return
+		log.Warn("Unable to read the dictionary file %s: %v ", dictionaryFile, err)
 	}
 
 	w.Header().Set("Content-Type", "text/csv")
