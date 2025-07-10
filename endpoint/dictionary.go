@@ -13,7 +13,7 @@ func DownloadByLanguage(w http.ResponseWriter, r *http.Request, path string) {
 	vars := mux.Vars(r)
 	language := vars["language"]
 
-	dictionaryFile := fmt.Sprintf("%s/%s.csv", path, language)
+	dictionaryFile := fmt.Sprintf(os.Getenv("ASSETS_PATH")+"%s/%s.csv", path, language)
 	content, err := os.ReadFile(dictionaryFile)
 	if err != nil {
 		log.Warn("Unable to read the dictionary file %s: %v ", dictionaryFile, err)

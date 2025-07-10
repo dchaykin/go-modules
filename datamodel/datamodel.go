@@ -248,7 +248,7 @@ func GetRoles(path string) ([]string, error) {
 }
 
 func LoadDataModelByRole(fileName, roleName string) (*TenantConfig, error) {
-	tc, err := loadDataModelFromFile(fileName)
+	tc, err := loadDataModelFromFile(os.Getenv("ASSETS_PATH") + fileName)
 	if err != nil {
 		return nil, err
 	}
