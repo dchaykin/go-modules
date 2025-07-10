@@ -17,25 +17,15 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func GetMenuItemsFromRequest(w http.ResponseWriter, r *http.Request, appName, subPath string) {
-	tenant, version, err := GetTenantVersionFromRequest(r)
-	if err != nil {
-		httpcomm.SetResponseError(&w, "", err, http.StatusBadRequest)
-		return
-	}
-
+func GetMenuItemsFromRequest(w http.ResponseWriter, r *http.Request, appName, menuFile string) {
 	userIdentity, err := auth.GetUserIdentityFromRequest(*r)
 	if err != nil {
 		httpcomm.SetResponseError(&w, "", err, http.StatusUnauthorized)
 		return
 	}
 
-	if subPath != "" {
-		subPath += "/"
-	}
-
 	mc := datamodel.MenuConfig{}
-	err = mc.ReadFromFile(os.Getenv("ASSETS_PATH")+"config/"+subPath+tenant, version)
+	err = mc.ReadFromFile(os.Getenv("ASSETS_PATH") + menuFile)
 	if err != nil {
 		httpcomm.SetResponseError(&w, "", err, http.StatusInternalServerError)
 		return
@@ -48,27 +38,20 @@ func GetMenuItemsFromRequest(w http.ResponseWriter, r *http.Request, appName, su
 	}.WriteData(w, httpcomm.PayloadFormatJSON)
 }
 
-func GetTenantConfig(w http.ResponseWriter, r *http.Request, configPath, appName string) *datamodel.TenantConfig {
-	tenant, version, err := GetTenantVersionFromRequest(r)
-	if err != nil {
-		httpcomm.SetResponseError(&w, "", err, http.StatusBadRequest)
-		return nil
-	}
-
+func GetTenantConfig(w http.ResponseWriter, r *http.Request, configFile, appName string) *datamodel.TenantConfig {
 	userIdentity, err := auth.GetUserIdentityFromRequest(*r)
 	if err != nil {
 		httpcomm.SetResponseError(&w, "", err, http.StatusUnauthorized)
 		return nil
 	}
 
-	path := fmt.Sprintf("%s/%s", configPath, tenant)
-	tenantConfig, err := datamodel.LoadDataModelByRole(path, userIdentity.RoleByApp(appName), version)
+	tenantConfig, err := datamodel.LoadDataModelByRole(configFile, userIdentity.RoleByApp(appName))
 	if err != nil {
 		httpcomm.SetResponseError(&w, "", err, http.StatusInternalServerError)
 		return nil
 	}
 
-	log.Debug("Loaded tenant config for %s, version %d, app %s, subject %s", tenant, tenantConfig.Version, appName, tenantConfig.Subject)
+	log.Debug("Loaded tenant config from %s, app %s, subject %s", configFile, appName, tenantConfig.Subject)
 
 	domainEntity := tenantConfig.DataModel[tenantConfig.Subject]
 	uuid, err := datamodel.GenerateUUID()

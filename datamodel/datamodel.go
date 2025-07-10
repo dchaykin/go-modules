@@ -200,9 +200,8 @@ func (cf CustomField) IsMasked() bool {
 	return result.(bool)
 }
 
-func loadDataModelFromFile(path string, version int) (*TenantConfig, error) {
-	fullPath := fmt.Sprintf("%s-%03d", path, version)
-	jsonData, err := os.ReadFile(fullPath + "/datamodel.json")
+func loadDataModelFromFile(path string) (*TenantConfig, error) {
+	jsonData, err := os.ReadFile(path + "/datamodel.json")
 	if err != nil {
 		return nil, err
 	}
@@ -212,29 +211,25 @@ func loadDataModelFromFile(path string, version int) (*TenantConfig, error) {
 		return nil, err
 	}
 
-	if tc.Version != version {
-		return nil, fmt.Errorf("tenant version does not match. Expected %d, got %d", version, tc.Version)
-	}
-
 	if tc.Subject == "" {
 		return nil, fmt.Errorf("subject is empty")
 	}
 
-	tc.path = fullPath
+	tc.path = path
 
 	return &tc, nil
 }
 
-func ReadPrefix(path, key string, version int) string {
-	tc, err := loadDataModelFromFile(path, version)
+func ReadPrefix(path, key string) string {
+	tc, err := loadDataModelFromFile(path)
 	if err != nil {
 		return ""
 	}
 	return tc.GetPrefix(key)
 }
 
-func GetRoles(path string, version int) ([]string, error) {
-	tc, err := loadDataModelFromFile(path, version)
+func GetRoles(path string) ([]string, error) {
+	tc, err := loadDataModelFromFile(path)
 	if err != nil {
 		return nil, err
 	}
@@ -252,8 +247,8 @@ func GetRoles(path string, version int) ([]string, error) {
 	return roles, nil
 }
 
-func LoadDataModelByRole(path, roleName string, version int) (*TenantConfig, error) {
-	tc, err := loadDataModelFromFile(path, version)
+func LoadDataModelByRole(fileName, roleName string) (*TenantConfig, error) {
+	tc, err := loadDataModelFromFile(fileName)
 	if err != nil {
 		return nil, err
 	}

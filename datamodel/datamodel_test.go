@@ -7,7 +7,7 @@ import (
 )
 
 func TestTenantConfig(t *testing.T) {
-	tc, err := LoadDataModelByRole("testdata", "customer", 1)
+	tc, err := LoadDataModelByRole("testdata-001", "customer")
 	require.NoError(t, err)
 
 	require.Nil(t, tc.Roles)

@@ -10,7 +10,7 @@ import (
 
 func TestMenuConfig_ReadFromFile(t *testing.T) {
 	mc := MenuConfig{}
-	err := mc.ReadFromFile("testdata", 1)
+	err := mc.ReadFromFile("testdata-001")
 	require.NoError(t, err)
 
 	menu := mc.CreateMenuByRole("customer")

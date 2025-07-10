@@ -12,18 +12,12 @@ import (
 	"github.com/dchaykin/go-modules/log"
 )
 
-func CreateTemporaryOverview(userIdentity auth.UserIdentity, version int, subPath string) error {
+func CreateTemporaryOverview(userIdentity auth.UserIdentity, pathToDatamodel string) error {
 	tenant := userIdentity.Tenant()
 
-	if subPath != "" {
-		subPath += "/"
-	}
+	log.Info("Creating overview for datamodel %s", pathToDatamodel)
 
-	configPath := os.Getenv("ASSETS_PATH") + "config/" + subPath + tenant
-
-	log.Info("Creating overview for tenant %s, role 'default', version %d", tenant, version)
-
-	tenantConfig, err := datamodel.LoadDataModelByRole(configPath, "default", version)
+	tenantConfig, err := datamodel.LoadDataModelByRole(os.Getenv("ASSETS_PATH")+pathToDatamodel, "default")
 	if err != nil {
 		return err
 	}

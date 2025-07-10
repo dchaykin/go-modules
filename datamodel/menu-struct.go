@@ -2,7 +2,6 @@ package datamodel
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 )
 
@@ -22,9 +21,8 @@ type MenuConfig struct {
 	Roles map[string]Menu  `json:"roles"`
 }
 
-func (mc *MenuConfig) ReadFromFile(path string, version int) error {
-	fullPath := fmt.Sprintf("%s-%03d", path, version)
-	jsonData, err := os.ReadFile(fullPath + "/menu-struct.json")
+func (mc *MenuConfig) ReadFromFile(path string) error {
+	jsonData, err := os.ReadFile(path + "/menu-struct.json")
 	if err != nil {
 		return err
 	}

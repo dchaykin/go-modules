@@ -12,20 +12,14 @@ import (
 
 type OnNextBulkInsert func(session database.DatabaseSession, offset int64) ([]datamodel.DomainEntity, error)
 
-func RebuildOverview(w http.ResponseWriter, r *http.Request, subject string, f OnNextBulkInsert) {
+func RebuildOverview(w http.ResponseWriter, r *http.Request, subject, pathToDatamodel string, f OnNextBulkInsert) {
 	userIdentity, err := auth.GetUserIdentityFromRequest(*r)
 	if err != nil {
 		httpcomm.SetResponseError(&w, "", err, http.StatusUnauthorized)
 		return
 	}
 
-	_, version, err := GetTenantVersionFromRequest(r)
-	if err != nil {
-		httpcomm.SetResponseError(&w, "", err, http.StatusBadRequest)
-		return
-	}
-
-	err = overview.CreateTemporaryOverview(userIdentity, version, subject)
+	err = overview.CreateTemporaryOverview(userIdentity, pathToDatamodel)
 	if err != nil {
 		httpcomm.SetResponseError(&w, "", err, http.StatusInternalServerError)
 		return
