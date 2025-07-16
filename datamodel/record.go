@@ -198,7 +198,7 @@ func GetErrorResponse(err error) *httpcomm.ServiceResponse {
 
 func (r *Record) ApplyMapper() {
 	r.applyMapper(0, r.Fields, r.Mapper.Cmbs, nil)
-	r.applyMapper(0, r.Fields, r.Mapper.Richtext, nil)
+	// r.applyMapper(0, r.Fields, r.Mapper.Richtext, nil)
 }
 
 type onFoundNewMapping func(key string, indexStr string, oldValue any, newValue any) any
