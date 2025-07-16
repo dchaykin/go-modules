@@ -89,6 +89,8 @@ func CommitOverview(userIdentity auth.UserIdentity, subject string) error {
 }
 
 func UpdateOverviewRow(userIdentity auth.UserIdentity, domainEntity datamodel.DomainEntity) error {
+	domainEntity.ApplyMapper()
+
 	data := DataRecord{
 		Row:    domainEntity.OverviewRow(),
 		Access: domainEntity.GetAccessConfig(),
