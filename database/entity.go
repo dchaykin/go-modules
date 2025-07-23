@@ -8,14 +8,18 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func GetDomainEntityByUUID(uuid string, domainEntity datamodel.DomainEntity) error {
+func FindDomainEntityByUUID(uuid string, domainEntity datamodel.DomainEntity) (bool, error) {
 	session, err := OpenSession()
 	if err != nil {
-		return err
+		return false, err
 	}
 	defer session.Close()
 
-	bFound, err := session.GetEntityByUUID(uuid, domainEntity)
+	return session.GetEntityByUUID(uuid, domainEntity)
+}
+
+func GetDomainEntityByUUID(uuid string, domainEntity datamodel.DomainEntity) error {
+	bFound, err := FindDomainEntityByUUID(uuid, domainEntity)
 	if err != nil {
 		return err
 	}
