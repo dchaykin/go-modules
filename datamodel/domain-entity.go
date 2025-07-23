@@ -15,6 +15,7 @@ type DomainEntity interface {
 	SetUUID(uuid string)
 	CreateEmpty() DomainEntity
 	SetValue(key string, value any)
+	GetValue(key string) any
 	DatabaseName() string
 	CollectionName() string
 	Entity() map[string]any

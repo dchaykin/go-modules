@@ -36,6 +36,14 @@ func (r *Record) SetValue(key string, value any) {
 	r.Fields[key] = value
 }
 
+func (r *Record) GetValue(key string) any {
+	value, ok := r.Fields[key]
+	if !ok {
+		return nil
+	}
+	return value
+}
+
 func (r *Record) cleanNil(data map[string]any) map[string]any {
 	cleaned := make(map[string]any)
 	for k, v := range data {
