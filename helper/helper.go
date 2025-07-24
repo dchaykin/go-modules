@@ -61,3 +61,15 @@ func FloatFromString(value string) float64 {
 	log.Errorf("Could not parse %s into float: %v", value, err)
 	return 0
 }
+
+func Int64FromString(value string) int64 {
+	if value == "" {
+		return 0
+	}
+	result, err := strconv.ParseInt(value, 10, 64)
+	if err == nil {
+		return result
+	}
+	log.Errorf("Could not parse %s into int64: %v", value, err)
+	return 0
+}
