@@ -33,10 +33,16 @@ func (r *Record) CleanNil() {
 }
 
 func (r *Record) SetValue(key string, value any) {
+	if r.Fields == nil {
+		r.Fields = make(map[string]any)
+	}
 	r.Fields[key] = value
 }
 
 func (r *Record) GetValue(key string) any {
+	if r.Fields == nil {
+		return nil
+	}
 	value, ok := r.Fields[key]
 	if !ok {
 		return nil
@@ -45,6 +51,9 @@ func (r *Record) GetValue(key string) any {
 }
 
 func (r *Record) AddRecord(key string, value any) {
+	if r.Fields == nil {
+		r.Fields = make(map[string]any)
+	}
 	_, ok := r.Fields[key]
 	if !ok {
 		r.Fields[key] = []any{value}
