@@ -200,7 +200,7 @@ func (r Record) UUID() string {
 }
 
 func (r *Record) SetUUID(UUID string) {
-	r.Fields["uuid"] = UUID
+	r.SetValue("uuid", UUID)
 }
 
 func (r Record) Entity() map[string]any {
