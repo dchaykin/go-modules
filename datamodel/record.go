@@ -44,6 +44,15 @@ func (r *Record) GetValue(key string) any {
 	return value
 }
 
+func (r *Record) AddRecord(key string, value any) {
+	_, ok := r.Fields[key]
+	if !ok {
+		r.Fields[key] = []any{value}
+	} else {
+		r.Fields[key] = append(r.Fields[key].([]any), value)
+	}
+}
+
 func (r *Record) cleanNil(data map[string]any) map[string]any {
 	cleaned := make(map[string]any)
 	for k, v := range data {
