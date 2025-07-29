@@ -33,7 +33,7 @@ func (l *location) OverviewRow() map[string]any {
 }
 
 func TestReadDomainEntites(t *testing.T) {
-	helper.LoadAccessData("../.do-not-commit/mongo-test.access")
+	helper.LoadAccessData("../.do-not-commit/env.vars")
 
 	session, err := OpenSession()
 	require.NoError(t, err)

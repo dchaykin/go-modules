@@ -3,6 +3,7 @@ package auth
 import (
 	"fmt"
 	"net/http"
+	"os"
 )
 
 type TestUser struct {
@@ -57,6 +58,14 @@ func (u TestUser) IsDeveloper() bool {
 }
 
 func (u TestUser) Set(req *http.Request) error {
+	if os.Getenv("AUTH_SECRET") == "" {
+		return nil
+	}
+	authorization, err := CreateAuthorizationToken(u.Claims, os.Getenv("AUTH_SECRET"))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Authorization", "Bearer "+string(authorization))
 	return nil
 }
 
