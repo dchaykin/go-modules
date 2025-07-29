@@ -29,9 +29,9 @@ type DomainEntity interface {
 	ApplyMapper()
 }
 
-type DomainItemList []any
+type EntityNodeList []EntityNode
 
-func (l *DomainItemList) Create(node any) {
+func (l *EntityNodeList) Create(node any) {
 	if node == nil {
 		return
 	}
@@ -52,26 +52,29 @@ func (l *DomainItemList) Create(node any) {
 	}
 }
 
-func (l DomainItemList) UniqueKeyList(fieldName string, separator string) string {
+func (l EntityNodeList) UniqueKeyList(fieldName string, separator string) string {
 	return l.UniqueKeysList([]string{fieldName}, "", separator)
 }
 
-func (l DomainItemList) UniqueKeysList(fieldNames []string, fieldSeparator, itemSeparator string) string {
+func (l EntityNodeList) UniqueKeysList(fieldNames []string, fieldSeparator, itemSeparator string) string {
 	result := []string{}
-	for _, v := range l {
-		if v == nil {
+	for _, node := range l {
+		if node == nil {
 			continue
 		}
-		item := DomainItem(v.(map[string]any))
-		result = append(result, item.Uniques(fieldNames, fieldSeparator))
+		result = append(result, node.Uniques(fieldNames, fieldSeparator))
 	}
 	return strings.Join(result, itemSeparator)
 }
 
-type DomainItem map[string]any
+type EntityNode map[string]any
 
-func (item DomainItem) AsBool(fieldName string, defaultValue bool) bool {
-	value, ok := item[fieldName]
+func (node EntityNode) UUID() string {
+	return node.AsString("uuid", "")
+}
+
+func (node EntityNode) AsBool(fieldName string, defaultValue bool) bool {
+	value, ok := node[fieldName]
 	if !ok || value == nil {
 		return defaultValue
 	}
@@ -83,16 +86,16 @@ func (item DomainItem) AsBool(fieldName string, defaultValue bool) bool {
 	}
 }
 
-func (item DomainItem) AsString(fieldName string, defaultValue string) string {
-	value, ok := item[fieldName]
+func (node EntityNode) AsString(fieldName string, defaultValue string) string {
+	value, ok := node[fieldName]
 	if !ok || value == nil {
 		return defaultValue
 	}
 	return fmt.Sprintf("%v", value)
 }
 
-func (item DomainItem) AsInt(fieldName string, defaultValue int) int {
-	value, ok := item[fieldName]
+func (node EntityNode) AsInt(fieldName string, defaultValue int) int {
+	value, ok := node[fieldName]
 	if !ok || value == nil {
 		return defaultValue
 	}
@@ -118,10 +121,10 @@ func (item DomainItem) AsInt(fieldName string, defaultValue int) int {
 	return defaultValue
 }
 
-func (item DomainItem) Uniques(fieldNames []string, separator string) string {
+func (node EntityNode) Uniques(fieldNames []string, separator string) string {
 	result := []string{}
 	for _, fieldName := range fieldNames {
-		value := item.AsString(fieldName, "")
+		value := node.AsString(fieldName, "")
 		if value == "" || slices.Contains(result, value) {
 			continue
 		}
@@ -130,6 +133,6 @@ func (item DomainItem) Uniques(fieldNames []string, separator string) string {
 	return strings.Join(result, separator)
 }
 
-func (item DomainItem) Unique(fieldName string) string {
-	return item.Uniques([]string{fieldName}, "")
+func (node EntityNode) Unique(fieldName string) string {
+	return node.Uniques([]string{fieldName}, "")
 }
