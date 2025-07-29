@@ -31,9 +31,13 @@ type DomainEntity interface {
 
 type EntityNodeList []EntityNode
 
-func (l *EntityNodeList) Create(node any) {
+func CreateEntityNodeList(node any) *EntityNodeList {
+	return (&EntityNodeList{}).Create(node)
+}
+
+func (l *EntityNodeList) Create(node any) *EntityNodeList {
 	if node == nil {
-		return
+		return l
 	}
 	switch v := node.(type) {
 	case []any:
@@ -50,6 +54,7 @@ func (l *EntityNodeList) Create(node any) {
 	default:
 		log.Warn("unexpected type of DomainItemList (expected slice): %T, %v", node, node)
 	}
+	return l
 }
 
 func (l EntityNodeList) UniqueKeyList(fieldName string, separator string) string {
