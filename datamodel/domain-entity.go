@@ -31,6 +31,27 @@ type DomainEntity interface {
 
 type DomainItemList []any
 
+func (l *DomainItemList) Create(node any) {
+	if node == nil {
+		return
+	}
+	switch v := node.(type) {
+	case []any:
+		for _, item := range v {
+			switch i := item.(type) {
+			case map[string]any:
+				{
+					*l = append(*l, i)
+				}
+			default:
+				log.Warn("unexpected type of DomainItemList item (expected map): %T, %v", item, item)
+			}
+		}
+	default:
+		log.Warn("unexpected type of DomainItemList (expected slice): %T, %v", node, node)
+	}
+}
+
 func (l DomainItemList) UniqueKeyList(fieldName string, separator string) string {
 	return l.UniqueKeysList([]string{fieldName}, "", separator)
 }
