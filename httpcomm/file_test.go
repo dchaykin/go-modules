@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/dchaykin/go-modules/auth"
+	"github.com/dchaykin/go-modules/log"
 	"github.com/stretchr/testify/require"
 )
 
@@ -27,6 +28,8 @@ func loadAccessData(fileName string) {
 
 func TestDownloadFile(t *testing.T) {
 	loadAccessData("../.do-not-commit/env.vars")
+	log.SetLevel(log.LevelDebug)
+
 	user := auth.GetTestUserIdentity()
 
 	md, err := DownloadFile("6887368bb26123efc0d0840ec3db3d94", "/tmp", user)

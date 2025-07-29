@@ -21,6 +21,8 @@ type MetaData struct {
 }
 
 func DownloadFile(fileUUID, path string, userIdentity auth.UserIdentity) (*MetaData, error) {
+	log.Debug("Downloading metadata for file %s", fileUUID)
+
 	ep := fmt.Sprintf("https://%s/app-cloudfile/api/metadata/%s", os.Getenv("MYHOST"), fileUUID)
 	hr := Get(ep, userIdentity, nil, nil)
 	if err := hr.GetError(); err != nil {
@@ -41,10 +43,14 @@ func DownloadFile(fileUUID, path string, userIdentity auth.UserIdentity) (*MetaD
 		return nil, log.WrapError(err)
 	}
 
+	log.Debug("Metadata for file %s is downloaded: %s", fileUUID, string(data))
+
 	md := MetaData{}
 	if err := json.Unmarshal(data, &md); err != nil {
 		return nil, log.WrapError(err)
 	}
+
+	log.Debug("Downloading file %s into %s", md.OriginalFileName, path)
 
 	ep = fmt.Sprintf("https://%s/app-cloudfile/api/file/%s", os.Getenv("MYHOST"), fileUUID)
 	hr = Get(ep, userIdentity, nil, nil)
@@ -54,6 +60,8 @@ func DownloadFile(fileUUID, path string, userIdentity auth.UserIdentity) (*MetaD
 	if err := os.WriteFile(path+"/"+md.OriginalFileName, hr.Answer, 0644); err != nil {
 		return nil, log.WrapError(err)
 	}
+
+	log.Debug("%s/%s downloaded", path, md.OriginalFileName)
 
 	return &md, nil
 }
