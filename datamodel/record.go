@@ -238,13 +238,13 @@ func (r *Record) ApplyMapper() {
 	r.applyMapper(0, r.Fields, r.Mapper.Richtext, r.GetOnFoundNewMapping(FieldTypeRichtext))
 }
 
-func (r *Record) GetOnFoundNewMapping(fieldType string) onFoundNewMapping {
+func (r *Record) GetOnFoundNewMapping(fieldType string) OnFoundNewMapping {
 	return nil
 }
 
-type onFoundNewMapping func(key string, indexStr string, oldValue any, newValue any) any
+type OnFoundNewMapping func(key string, indexStr string, oldValue any, newValue any) any
 
-func (r *Record) applyMapper(index int, fields map[string]any, mapper map[string]any, callback onFoundNewMapping) {
+func (r *Record) applyMapper(index int, fields map[string]any, mapper map[string]any, callback OnFoundNewMapping) {
 	for key, mapping := range mapper {
 		subMap, ok := mapping.(map[string]any)
 		if !ok {
