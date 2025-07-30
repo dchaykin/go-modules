@@ -27,6 +27,16 @@ type Record struct {
 	Metadata Metadata       `bson:"metadata"`
 	Fields   map[string]any `json:"entity" bson:"entity"`
 	Mapper   Mapper         `json:"mapper" bson:"mapper"`
+
+	userIdentity auth.UserIdentity `bson:"-"`
+}
+
+func (r Record) UserIdentity() auth.UserIdentity {
+	return r.userIdentity
+}
+
+func (r *Record) SetUserIdentity(userIdentity auth.UserIdentity) {
+	r.userIdentity = userIdentity
 }
 
 func (r *Record) CleanNil() {
@@ -130,11 +140,11 @@ func (r *Record) cleanSlice(slice []any) []any {
 	return result
 }
 
-func (r *Record) SetMetadata(userIdentity auth.UserIdentity, appName string) {
+func (r *Record) SetMetadata(appName string) {
 	r.Metadata.Timestamp = time.Now()
-	r.Metadata.Partner = userIdentity.Partner()
-	r.Metadata.Role = userIdentity.RoleByApp(appName)
-	r.Metadata.User = userIdentity.Username()
+	r.Metadata.Partner = r.userIdentity.Partner()
+	r.Metadata.Role = r.userIdentity.RoleByApp(appName)
+	r.Metadata.User = r.userIdentity.Username()
 }
 
 func (r *Record) BeforeSave(session database.DatabaseSession) error {

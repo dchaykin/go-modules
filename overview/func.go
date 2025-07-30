@@ -89,7 +89,7 @@ func CommitOverview(userIdentity auth.UserIdentity, subject string) error {
 	return nil
 }
 
-func UpdateOverviewRow(userIdentity auth.UserIdentity, domainEntity database.DomainEntity) error {
+func UpdateOverviewRow(domainEntity database.DomainEntity) error {
 	domainEntity.ApplyMapper()
 
 	data := DataRecord{
@@ -103,7 +103,7 @@ func UpdateOverviewRow(userIdentity auth.UserIdentity, domainEntity database.Dom
 	}
 
 	endpoint := fmt.Sprintf("https://%s/app-overview/api/save/%s", os.Getenv("MYHOST"), domainEntity.CollectionName())
-	resp := httpcomm.Post(endpoint, userIdentity, nil, string(payload))
+	resp := httpcomm.Post(endpoint, domainEntity.UserIdentity(), nil, string(payload))
 	if resp.StatusCode != http.StatusOK {
 		return resp.GetError()
 	}

@@ -88,7 +88,7 @@ func GetDomainEntityByUUID(w http.ResponseWriter, r *http.Request, domainEntity 
 	}.WriteData(w, httpcomm.PayloadFormatJSON)
 }
 
-func CreateEntity(w http.ResponseWriter, r *http.Request, domainEntity database.DomainEntity, subject string) {
+func CreateEntity(w http.ResponseWriter, r *http.Request, domainEntity database.DomainEntity, appName string) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		httpcomm.SetResponseError(&w, "Unable to fetch payload from body", err, http.StatusBadRequest)
@@ -96,7 +96,7 @@ func CreateEntity(w http.ResponseWriter, r *http.Request, domainEntity database.
 	}
 	defer r.Body.Close()
 
-	log.Debug("create %s, body: %s", subject, string(body))
+	log.Debug("creating entity for app: %s, payload: %s", appName, string(body))
 
 	userIdentity, err := auth.GetUserIdentityFromRequest(*r)
 	if err != nil {
@@ -110,9 +110,10 @@ func CreateEntity(w http.ResponseWriter, r *http.Request, domainEntity database.
 		return
 	}
 
-	domainEntity.SetMetadata(userIdentity, subject)
+	domainEntity.SetUserIdentity(userIdentity)
+	domainEntity.SetMetadata(appName)
 
-	err = ReplaceEntity(domainEntity, userIdentity)
+	err = ReplaceEntity(domainEntity)
 	if err != nil {
 		httpcomm.SetResponseError(&w, "", err, http.StatusInternalServerError)
 		return
@@ -121,12 +122,16 @@ func CreateEntity(w http.ResponseWriter, r *http.Request, domainEntity database.
 	w.WriteHeader(http.StatusCreated)
 }
 
-func ReplaceEntity(domainEntity database.DomainEntity, userIdentity auth.UserIdentity) error {
+func ReplaceEntity(domainEntity database.DomainEntity) error {
+	if domainEntity.UserIdentity() == nil {
+		return fmt.Errorf("no user identity found for entity: %v", domainEntity)
+	}
+
 	err := saveEntity(domainEntity)
 	if err != nil {
 		return fmt.Errorf("unable to save %s into the database. UUID: %s. Error: %v", domainEntity.CollectionName(), domainEntity.UUID(), err)
 	}
-	err = overview.UpdateOverviewRow(userIdentity, domainEntity)
+	err = overview.UpdateOverviewRow(domainEntity)
 	if err != nil {
 		return fmt.Errorf("could not create or update an overview row. UUID: %s. Error: %v", domainEntity.UUID(), err)
 	}

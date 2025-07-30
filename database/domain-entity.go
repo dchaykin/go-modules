@@ -25,10 +25,12 @@ type DomainEntity interface {
 	CollectionName() string
 	Entity() map[string]any
 	OverviewRow() map[string]any
-	SetMetadata(userIdentity auth.UserIdentity, subject string)
+	SetMetadata(appName string)
 	GetAccessConfig() []AccessConfig
 	CleanNil()
 	BeforeSave(session DatabaseSession) error
+	SetUserIdentity(userIdentity auth.UserIdentity)
+	UserIdentity() auth.UserIdentity
 
 	NormalizePrimitives()
 	ApplyMapper()
