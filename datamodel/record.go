@@ -234,8 +234,12 @@ func GetErrorResponse(err error) *httpcomm.ServiceResponse {
 }
 
 func (r *Record) ApplyMapper() {
-	r.applyMapper(0, r.Fields, r.Mapper.Cmbs, nil)
-	// r.applyMapper(0, r.Fields, r.Mapper.Richtext, nil)
+	r.applyMapper(0, r.Fields, r.Mapper.Cmbs, r.GetOnFoundNewMapping(FieldTypeCombobox))
+	r.applyMapper(0, r.Fields, r.Mapper.Richtext, r.GetOnFoundNewMapping(FieldTypeRichtext))
+}
+
+func (r *Record) GetOnFoundNewMapping(fieldType string) onFoundNewMapping {
+	return nil
 }
 
 type onFoundNewMapping func(key string, indexStr string, oldValue any, newValue any) any

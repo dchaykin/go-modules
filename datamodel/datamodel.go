@@ -22,6 +22,7 @@ const (
 	FieldTypeImage    = "image"
 	FieldTypeList     = "list"
 	FieldTypeFile     = "file"
+	FieldTypeRichtext = "richtext"
 )
 
 type CustomFields map[string]CustomField
