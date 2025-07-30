@@ -78,10 +78,10 @@ func DownloadFile(fileUUID, path string, userIdentity auth.UserIdentity) (*MetaD
 	return md, nil
 }
 
-func UploadFile(pathToFile string, userIdentity auth.UserIdentity) (*MetaData, error) {
+func UploadFile(pathToFile string, userIdentity auth.UserIdentity) (string, *MetaData, error) {
 	file, err := os.Open(pathToFile)
 	if err != nil {
-		return nil, log.WrapError(fmt.Errorf("error opening file %s: %w", pathToFile, err))
+		return "", nil, log.WrapError(fmt.Errorf("error opening file %s: %w", pathToFile, err))
 	}
 	defer file.Close()
 
@@ -91,15 +91,15 @@ func UploadFile(pathToFile string, userIdentity auth.UserIdentity) (*MetaData, e
 	// File-Part hinzufügen (entspricht -F "filename=@...")
 	part, err := writer.CreateFormFile("filename", file.Name())
 	if err != nil {
-		return nil, log.WrapError(fmt.Errorf("error creating form file: %w", err))
+		return "", nil, log.WrapError(fmt.Errorf("error creating form file: %w", err))
 	}
 
 	if _, err = io.Copy(part, file); err != nil {
-		return nil, log.WrapError(fmt.Errorf("error copying file to form: %w", err))
+		return "", nil, log.WrapError(fmt.Errorf("error copying file to form: %w", err))
 	}
 
 	if err := writer.Close(); err != nil {
-		return nil, log.WrapError(fmt.Errorf("error closing writer: %w", err))
+		return "", nil, log.WrapError(fmt.Errorf("error closing writer: %w", err))
 	}
 
 	ep := fmt.Sprintf("https://%s/app-cloudfile/api/upload", os.Getenv("MYHOST"))
@@ -108,17 +108,18 @@ func UploadFile(pathToFile string, userIdentity auth.UserIdentity) (*MetaData, e
 	}, &body)
 
 	if err := hr.GetError(); err != nil {
-		return nil, log.WrapError(err)
+		return "", nil, log.WrapError(err)
 	}
 
 	sr := ServiceResponse{}
 	err = json.Unmarshal([]byte(hr.Answer), &sr)
 	if err != nil {
-		return nil, log.WrapError(err)
+		return "", nil, log.WrapError(err)
 	}
 
 	fileUUID := fmt.Sprintf("%v", sr.Data)
 	log.Debug("%s uploaded, uuid: %v", pathToFile, fileUUID)
 
-	return retrieveMetaData(fileUUID, userIdentity)
+	md, err := retrieveMetaData(fileUUID, userIdentity)
+	return fileUUID, md, err
 }

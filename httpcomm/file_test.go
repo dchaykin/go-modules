@@ -49,10 +49,11 @@ func TestUploadFile(t *testing.T) {
 
 	user := auth.GetTestUserIdentity()
 
-	md, err := UploadFile(os.TempDir()+"inquiry/IntroductionToSemiconductorModule.pdf", user)
+	fileUUID, md, err := UploadFile(os.TempDir()+"inquiry/IntroductionToSemiconductorModule.pdf", user)
 	require.NoError(t, err)
 
 	require.NotNil(t, md)
+	require.NotEmpty(t, fileUUID)
 	require.Equal(t, "IntroductionToSemiconductorModule.pdf", md.OriginalFileName)
 	require.Equal(t, md.FileSize, int64(2248586))
 }
