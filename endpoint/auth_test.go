@@ -10,7 +10,9 @@ import (
 
 func TestCreateTokenByCredentials(t *testing.T) {
 	helper.LoadAccessData("../.do-not-commit/env.vars")
-	token, err := CreateTokenByCredentials(os.Getenv("TECH_USER"), os.Getenv("TECH_PASS"))
+	userIdentity, err := CreateUserIdentityByCredentials(os.Getenv("TECH_USER"), os.Getenv("TECH_PASS"), os.Getenv("AUTH_SECRET"))
 	require.NoError(t, err)
-	require.NotNil(t, token)
+	require.NotNil(t, userIdentity)
+	require.Equal(t, "Cycle", userIdentity.FirstName())
+	require.Equal(t, "Bot", userIdentity.SurName())
 }
