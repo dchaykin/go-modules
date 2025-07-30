@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/dchaykin/go-modules/database"
 	"github.com/dchaykin/go-modules/datamodel"
 	"github.com/stretchr/testify/require"
 )
@@ -38,7 +39,7 @@ func (de testDomainEntity) CollectionName() string {
 	return "test"
 }
 
-func (de *testDomainEntity) GetAccessConfig() []datamodel.AccessConfig {
+func (de *testDomainEntity) GetAccessConfig() []database.AccessConfig {
 	return nil
 }
 
@@ -46,30 +47,30 @@ func (de testDomainEntity) OverviewRow() map[string]any {
 	return nil
 }
 
-func (de testDomainEntity) BeforeSave() error {
+func (de testDomainEntity) BeforeSave(session database.DatabaseSession) error {
 	return nil
 }
 
-func (de testDomainEntity) CreateEmpty() datamodel.DomainEntity {
+func (de testDomainEntity) CreateEmpty() database.DomainEntity {
 	return &testDomainEntity{}
 }
 
 func TestEnsureUUID(t *testing.T) {
 	doc := testDomainEntity{}
 
-	err := EnsureUUID(&doc)
+	err := datamodel.EnsureUUID(&doc)
 	require.NoError(t, err)
 	require.EqualValues(t, 32, len(doc.UUID()))
 
 	doc.SetUUID("invalid-uuid")
-	err = EnsureUUID(&doc)
+	err = datamodel.EnsureUUID(&doc)
 	require.NoError(t, err)
 	require.EqualValues(t, 32, len(doc.UUID()))
 
 	uuid, err := datamodel.GenerateUUID()
 	doc.SetUUID(uuid)
 	require.NoError(t, err)
-	err = EnsureUUID(&doc)
+	err = datamodel.EnsureUUID(&doc)
 	require.NoError(t, err)
 	require.EqualValues(t, uuid, doc.UUID())
 }

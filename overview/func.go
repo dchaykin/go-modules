@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/dchaykin/go-modules/auth"
+	"github.com/dchaykin/go-modules/database"
 	"github.com/dchaykin/go-modules/datamodel"
 	"github.com/dchaykin/go-modules/httpcomm"
 	"github.com/dchaykin/go-modules/log"
@@ -37,7 +38,7 @@ func CreateTemporaryOverview(userIdentity auth.UserIdentity, pathToDatamodel str
 	return nil
 }
 
-func BulkInsertIntoOverview(userIdentity auth.UserIdentity, subject string, entityList []datamodel.DomainEntity, isTemporary bool) error {
+func BulkInsertIntoOverview(userIdentity auth.UserIdentity, subject string, entityList []database.DomainEntity, isTemporary bool) error {
 	recordList := []DataRecord{}
 	for _, entity := range entityList {
 
@@ -88,7 +89,7 @@ func CommitOverview(userIdentity auth.UserIdentity, subject string) error {
 	return nil
 }
 
-func UpdateOverviewRow(userIdentity auth.UserIdentity, domainEntity datamodel.DomainEntity) error {
+func UpdateOverviewRow(userIdentity auth.UserIdentity, domainEntity database.DomainEntity) error {
 	domainEntity.ApplyMapper()
 
 	data := DataRecord{

@@ -3,12 +3,11 @@ package database
 import (
 	"fmt"
 
-	"github.com/dchaykin/go-modules/datamodel"
 	"github.com/dchaykin/go-modules/log"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func FindDomainEntityByUUID(uuid string, domainEntity datamodel.DomainEntity) (bool, error) {
+func FindDomainEntityByUUID(uuid string, domainEntity DomainEntity) (bool, error) {
 	session, err := OpenSession()
 	if err != nil {
 		return false, err
@@ -18,7 +17,7 @@ func FindDomainEntityByUUID(uuid string, domainEntity datamodel.DomainEntity) (b
 	return session.GetEntityByUUID(uuid, domainEntity)
 }
 
-func GetDomainEntityByUUID(uuid string, domainEntity datamodel.DomainEntity) error {
+func GetDomainEntityByUUID(uuid string, domainEntity DomainEntity) error {
 	bFound, err := FindDomainEntityByUUID(uuid, domainEntity)
 	if err != nil {
 		return err
@@ -29,7 +28,7 @@ func GetDomainEntityByUUID(uuid string, domainEntity datamodel.DomainEntity) err
 	return nil
 }
 
-func ReadDomainEntities(session DatabaseSession, domainEntity datamodel.DomainEntity, offset, limit int64) ([]datamodel.DomainEntity, error) {
+func ReadDomainEntities(session DatabaseSession, domainEntity DomainEntity, offset, limit int64) ([]DomainEntity, error) {
 	coll := session.GetCollection(domainEntity.DatabaseName(), domainEntity.CollectionName())
 	dataList := []any{}
 	sortOpt := bson.D{{Key: "uuid", Value: 1}}
@@ -44,7 +43,7 @@ func ReadDomainEntities(session DatabaseSession, domainEntity datamodel.DomainEn
 	return resultList, log.WrapError(err)
 }
 
-func convertToDomainEntities(sourceList []any, domainEntity datamodel.DomainEntity) (resultList []datamodel.DomainEntity, err error) {
+func convertToDomainEntities(sourceList []any, domainEntity DomainEntity) (resultList []DomainEntity, err error) {
 	for i, item := range sourceList {
 		o, err := bson.Marshal(item)
 		if err != nil {

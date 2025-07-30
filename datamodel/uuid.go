@@ -7,6 +7,9 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+
+	"github.com/dchaykin/go-modules/database"
+	"github.com/dchaykin/go-modules/log"
 )
 
 func GenerateUUID() (string, error) {
@@ -31,4 +34,20 @@ func ExtractTimeFromUUID(uuid string) (time.Time, error) {
 		return time.Time{}, fmt.Errorf("invalid Hex-Timestamp: %w", err)
 	}
 	return time.Unix(unixSeconds, 0), nil
+}
+
+func EnsureUUID(domainEntity database.DomainEntity) error {
+	uuid := domainEntity.UUID()
+	if len(uuid) > 0 && len(uuid) != 32 {
+		log.Info("invalid uuid: %s. A new value will be generated", uuid)
+	} else if len(uuid) == 32 {
+		return nil
+	}
+
+	uuid, err := GenerateUUID()
+	if err != nil {
+		return fmt.Errorf("could not generate a uuid: %v", err)
+	}
+	domainEntity.SetUUID(uuid)
+	return nil
 }

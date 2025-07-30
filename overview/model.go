@@ -1,10 +1,10 @@
 package overview
 
-import "github.com/dchaykin/go-modules/datamodel"
+import "github.com/dchaykin/go-modules/database"
 
 type DataRecord struct {
-	Row    map[string]any           `json:"row"`
-	Access []datamodel.AccessConfig `json:"access"`
+	Row    map[string]any          `json:"row"`
+	Access []database.AccessConfig `json:"access"`
 }
 
 func (r DataRecord) UUID() string {

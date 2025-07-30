@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/dchaykin/go-modules/auth"
+	"github.com/dchaykin/go-modules/database"
 	"github.com/dchaykin/go-modules/httpcomm"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -136,7 +137,7 @@ func (r *Record) SetMetadata(userIdentity auth.UserIdentity, appName string) {
 	r.Metadata.User = userIdentity.Username()
 }
 
-func (r *Record) BeforeSave() error {
+func (r *Record) BeforeSave(session database.DatabaseSession) error {
 	return nil
 }
 

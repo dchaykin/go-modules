@@ -10,7 +10,6 @@ import (
 	"github.com/dchaykin/go-modules/auth"
 	"github.com/dchaykin/go-modules/database"
 	"github.com/dchaykin/go-modules/datamodel"
-	"github.com/dchaykin/go-modules/helper"
 	"github.com/dchaykin/go-modules/httpcomm"
 	"github.com/dchaykin/go-modules/log"
 	"github.com/dchaykin/go-modules/overview"
@@ -64,7 +63,7 @@ func GetTenantConfig(w http.ResponseWriter, r *http.Request, configFile, appName
 	return tenantConfig
 }
 
-func GetDomainEntityByUUID(w http.ResponseWriter, r *http.Request, domainEntity datamodel.DomainEntity) {
+func GetDomainEntityByUUID(w http.ResponseWriter, r *http.Request, domainEntity database.DomainEntity) {
 	vars := mux.Vars(r)
 	uuid := vars["uuid"]
 
@@ -89,7 +88,7 @@ func GetDomainEntityByUUID(w http.ResponseWriter, r *http.Request, domainEntity 
 	}.WriteData(w, httpcomm.PayloadFormatJSON)
 }
 
-func CreateEntity(w http.ResponseWriter, r *http.Request, domainEntity datamodel.DomainEntity, subject string) {
+func CreateEntity(w http.ResponseWriter, r *http.Request, domainEntity database.DomainEntity, subject string) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		httpcomm.SetResponseError(&w, "Unable to fetch payload from body", err, http.StatusBadRequest)
@@ -122,7 +121,7 @@ func CreateEntity(w http.ResponseWriter, r *http.Request, domainEntity datamodel
 	w.WriteHeader(http.StatusCreated)
 }
 
-func ReplaceEntity(domainEntity datamodel.DomainEntity, userIdentity auth.UserIdentity) error {
+func ReplaceEntity(domainEntity database.DomainEntity, userIdentity auth.UserIdentity) error {
 	err := saveEntity(domainEntity)
 	if err != nil {
 		return fmt.Errorf("unable to save %s into the database. UUID: %s. Error: %v", domainEntity.CollectionName(), domainEntity.UUID(), err)
@@ -134,16 +133,11 @@ func ReplaceEntity(domainEntity datamodel.DomainEntity, userIdentity auth.UserId
 	return nil
 }
 
-func saveEntity(domainEntity datamodel.DomainEntity) error {
+func saveEntity(domainEntity database.DomainEntity) error {
 	domainEntity.CleanNil()
-	err := helper.EnsureUUID(domainEntity)
+	err := datamodel.EnsureUUID(domainEntity)
 	if err != nil {
 		return fmt.Errorf("unable to generate a uuid: %v", err)
-	}
-
-	err = domainEntity.BeforeSave()
-	if err != nil {
-		return err
 	}
 
 	session, err := database.OpenSession()
@@ -151,6 +145,11 @@ func saveEntity(domainEntity datamodel.DomainEntity) error {
 		return log.WrapError(err)
 	}
 	defer session.Close()
+
+	err = domainEntity.BeforeSave(session)
+	if err != nil {
+		return err
+	}
 
 	return session.ReplaceEntityByUUID(domainEntity, true)
 }

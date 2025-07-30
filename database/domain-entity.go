@@ -1,4 +1,4 @@
-package datamodel
+package database
 
 import (
 	"fmt"
@@ -9,6 +9,11 @@ import (
 	"github.com/dchaykin/go-modules/auth"
 	"github.com/dchaykin/go-modules/log"
 )
+
+type AccessConfig struct {
+	Partner   string  `json:"partner"`
+	Algorithm *string `json:"algo,omitempty"`
+}
 
 type DomainEntity interface {
 	UUID() string
@@ -23,7 +28,7 @@ type DomainEntity interface {
 	SetMetadata(userIdentity auth.UserIdentity, subject string)
 	GetAccessConfig() []AccessConfig
 	CleanNil()
-	BeforeSave() error
+	BeforeSave(session DatabaseSession) error
 
 	NormalizePrimitives()
 	ApplyMapper()

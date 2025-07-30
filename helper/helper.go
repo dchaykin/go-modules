@@ -6,7 +6,6 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/dchaykin/go-modules/datamodel"
 	"github.com/dchaykin/go-modules/log"
 )
 
@@ -24,22 +23,6 @@ func LoadAccessData(fileName string) {
 	for k, v := range accessData {
 		os.Setenv(k, v)
 	}
-}
-
-func EnsureUUID(domainEntity datamodel.DomainEntity) error {
-	uuid := domainEntity.UUID()
-	if len(uuid) > 0 && len(uuid) != 32 {
-		log.Info("invalid uuid: %s. A new value will be generated", uuid)
-	} else if len(uuid) == 32 {
-		return nil
-	}
-
-	uuid, err := datamodel.GenerateUUID()
-	if err != nil {
-		return fmt.Errorf("could not generate a uuid: %v", err)
-	}
-	domainEntity.SetUUID(uuid)
-	return nil
 }
 
 func ValueString(fields map[string]any, fieldName string) string {
