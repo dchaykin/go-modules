@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+	"unicode/utf8"
 
 	"github.com/dchaykin/go-modules/auth"
 	"github.com/dchaykin/go-modules/database"
@@ -239,7 +240,24 @@ func (r *Record) ApplyMapper() {
 }
 
 func (r *Record) GetOnFoundNewMapping(fieldType string) OnFoundNewMapping {
+	if fieldType == FieldTypeRichtext {
+		return func(key, indexStr string, oldValue, newValue any) any {
+			str := fmt.Sprintf("%v", oldValue)
+			if len(str) > 1024 {
+				return truncateString(fmt.Sprintf("%v", newValue), 1024)
+			}
+			return oldValue
+		}
+	}
 	return nil
+}
+
+func truncateString(s string, maxLen int) string {
+	if utf8.RuneCountInString(s) > maxLen {
+		runes := []rune(s)
+		return string(runes[:maxLen-3]) + "..."
+	}
+	return s
 }
 
 type OnFoundNewMapping func(key string, indexStr string, oldValue any, newValue any) any
