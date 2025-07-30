@@ -79,6 +79,11 @@ func DownloadFile(fileUUID, path string, userIdentity auth.UserIdentity) (*MetaD
 }
 
 func UploadFile(pathToFile string, userIdentity auth.UserIdentity) (string, *MetaData, error) {
+	log.Debug("Uploading file %s", pathToFile)
+	if userIdentity == nil {
+		return "", nil, log.WrapError(fmt.Errorf("userIdentity is nil, could not upload file %s", pathToFile))
+	}
+
 	file, err := os.Open(pathToFile)
 	if err != nil {
 		return "", nil, log.WrapError(fmt.Errorf("error opening file %s: %w", pathToFile, err))

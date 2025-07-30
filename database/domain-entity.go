@@ -52,12 +52,18 @@ func (l *EntityNodeList) Create(node any) *EntityNodeList {
 			switch i := item.(type) {
 			case map[string]any:
 				{
+					*l = append(*l, EntityNode(i))
+				}
+			case EntityNode:
+				{
 					*l = append(*l, i)
 				}
 			default:
 				log.Warn("unexpected type of DomainItemList item (expected map): %T, %v", item, item)
 			}
 		}
+	case EntityNodeList:
+		*l = v
 	default:
 		log.Warn("unexpected type of DomainItemList (expected slice): %T, %v", node, node)
 	}
