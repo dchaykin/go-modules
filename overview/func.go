@@ -17,7 +17,7 @@ func CreateTemporaryOverview(userIdentity auth.UserIdentity, pathToDatamodel str
 
 	log.Info("Creating overview for datamodel %s", pathToDatamodel)
 
-	tenantConfig, err := datamodel.LoadDataModelByRole(os.Getenv("ASSETS_PATH")+pathToDatamodel, "default")
+	tenantConfig, err := datamodel.LoadDataModelByRole(pathToDatamodel, "default")
 	if err != nil {
 		return err
 	}
