@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// also used in other unittest files...
 const testJsonRecord = `{
 			"metadata": {},
 			"entity": {

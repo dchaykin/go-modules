@@ -1,8 +1,11 @@
 package datamodel
 
 import (
+	"encoding/json"
+	"reflect"
 	"testing"
 
+	"github.com/dchaykin/go-modules/database"
 	"github.com/stretchr/testify/require"
 )
 
@@ -41,4 +44,66 @@ func TestCustomFieldValueByType(t *testing.T) {
 
 	field["type"] = FieldTypeDate
 	require.Equal(t, "2025", field.ValueByType("2025"))
+}
+
+type testDomainEntity struct {
+	Record
+}
+
+func (de testDomainEntity) DatabaseName() string {
+	return "test"
+}
+
+func (de testDomainEntity) CollectionName() string {
+	return "test"
+}
+
+func (de *testDomainEntity) GetAccessConfig() []database.AccessConfig {
+	return nil
+}
+
+func (de testDomainEntity) OverviewRow() map[string]any {
+	return nil
+}
+
+func (de testDomainEntity) BeforeSave(session database.DatabaseSession) error {
+	return nil
+}
+
+func (de testDomainEntity) CreateEmpty() database.DomainEntity {
+	return &testDomainEntity{}
+}
+
+func TestEnsureUUID(t *testing.T) {
+	doc := testDomainEntity{}
+
+	err := EnsureUUID(&doc)
+	require.NoError(t, err)
+	require.EqualValues(t, 32, len(doc.UUID()))
+
+	doc.SetUUID("invalid-uuid")
+	err = EnsureUUID(&doc)
+	require.NoError(t, err)
+	require.EqualValues(t, 32, len(doc.UUID()))
+
+	uuid, err := GenerateUUID()
+	doc.SetUUID(uuid)
+	require.NoError(t, err)
+	err = EnsureUUID(&doc)
+	require.NoError(t, err)
+	require.EqualValues(t, uuid, doc.UUID())
+}
+
+func TestCleanNil(t *testing.T) {
+	rec := Record{}
+	err := json.Unmarshal([]byte(testJsonRecord), &rec)
+	require.NoError(t, err)
+
+	rec.CleanNil()
+
+	expected := map[string]any{}
+	err = json.Unmarshal([]byte(`{"foo":{"boz":234,"bar":[{"baz":1},{"baz":2}],"foz":123}}`), &expected)
+	require.NoError(t, err)
+
+	require.EqualValues(t, true, reflect.DeepEqual(expected, rec.Fields))
 }

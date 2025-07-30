@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/dchaykin/go-modules/helper"
 	"github.com/dchaykin/go-modules/log"
 )
 
@@ -141,11 +142,15 @@ func (cf CustomField) Type() string {
 	return fmt.Sprintf("%s", cf["type"])
 }
 
-func (cf CustomField) Size() int {
+func (cf CustomField) Size() int64 {
 	if cf["size"] == nil {
 		return 256
 	}
-	return cf["size"].(int)
+	size := fmt.Sprintf("%s", cf["size"])
+	if size == "" {
+		return 256
+	}
+	return helper.Int64FromString(size)
 }
 
 func (cf CustomField) ValueByType(value any) any {
