@@ -29,7 +29,7 @@ func CreateTemporaryOverview(userIdentity auth.UserIdentity, pathToDatamodel str
 	}
 
 	endpoint := fmt.Sprintf("https://%s/app-overview/api/create/overview/%s?temporary=true", os.Getenv("MYHOST"), tenant)
-	resp := httpcomm.Post(endpoint, userIdentity, nil, string(payload))
+	resp := httpcomm.Post(endpoint, userIdentity, nil, payload)
 	if resp.StatusCode != http.StatusOK {
 		return resp.GetError()
 	}
@@ -65,7 +65,7 @@ func BulkInsertIntoOverview(userIdentity auth.UserIdentity, subject string, enti
 	}
 
 	endpoint := fmt.Sprintf("https://%s/app-overview/api/bulk-insert/%s?%s", os.Getenv("MYHOST"), subject, params)
-	resp := httpcomm.Post(endpoint, userIdentity, nil, string(payload))
+	resp := httpcomm.Post(endpoint, userIdentity, nil, payload)
 	if resp.StatusCode != http.StatusOK {
 		return resp.GetError()
 	}
@@ -80,7 +80,7 @@ func CommitOverview(userIdentity auth.UserIdentity, subject string) error {
 	log.Info("Committing overview for tenant '%s', subject '%s'", tenant, subject)
 
 	endpoint := fmt.Sprintf("https://%s/app-overview/api/commit/overview/%s/%s", os.Getenv("MYHOST"), tenant, subject)
-	resp := httpcomm.Post(endpoint, userIdentity, nil, "")
+	resp := httpcomm.Post(endpoint, userIdentity, nil, nil)
 	if resp.StatusCode != http.StatusOK {
 		return resp.GetError()
 	}
@@ -103,7 +103,7 @@ func UpdateOverviewRow(domainEntity database.DomainEntity) error {
 	}
 
 	endpoint := fmt.Sprintf("https://%s/app-overview/api/save/%s", os.Getenv("MYHOST"), domainEntity.CollectionName())
-	resp := httpcomm.Post(endpoint, domainEntity.UserIdentity(), nil, string(payload))
+	resp := httpcomm.Post(endpoint, domainEntity.UserIdentity(), nil, payload)
 	if resp.StatusCode != http.StatusOK {
 		return resp.GetError()
 	}

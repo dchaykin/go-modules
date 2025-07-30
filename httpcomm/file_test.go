@@ -42,3 +42,17 @@ func TestDownloadFile(t *testing.T) {
 	require.NotNil(t, md)
 	require.Equal(t, "Invoice-E01KUPOQ-0001.pdf", md.OriginalFileName)
 }
+
+func TestUploadFile(t *testing.T) {
+	loadAccessData("../.do-not-commit/env.vars")
+	log.SetLevel(log.LevelDebug)
+
+	user := auth.GetTestUserIdentity()
+
+	md, err := UploadFile(os.TempDir()+"inquiry/IntroductionToSemiconductorModule.pdf", user)
+	require.NoError(t, err)
+
+	require.NotNil(t, md)
+	require.Equal(t, "IntroductionToSemiconductorModule.pdf", md.OriginalFileName)
+	require.Equal(t, md.FileSize, int64(2248586))
+}

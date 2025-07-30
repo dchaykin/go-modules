@@ -10,16 +10,20 @@ import (
 	"github.com/dchaykin/go-modules/log"
 )
 
-func Post(endpoint string, identity auth.UserIdentity, headers map[string]string, data ...string) (httpResult HTTPResult) {
-	return post(endpoint, false, identity, headers, data...)
+func Post(endpoint string, identity auth.UserIdentity, headers map[string]string, payload []byte) (httpResult HTTPResult) {
+	if payload == nil {
+		payload = []byte{}
+	}
+	log.Debug("/POST %s [ %s ]", endpoint, string(payload))
+	return post(endpoint, false, identity, headers, bytes.NewBuffer(payload))
 }
 
-func post(endpoint string, insecure bool, identity auth.UserIdentity, headers map[string]string, data ...string) (httpResult HTTPResult) {
-	payload := getPayloadFromSlice(data...)
+func PostBuffer(endpoint string, identity auth.UserIdentity, headers map[string]string, body *bytes.Buffer) (httpResult HTTPResult) {
+	return post(endpoint, false, identity, headers, body)
+}
 
-	log.Debug("/POST %s [ %s ]", endpoint, payload)
-
-	req, err := http.NewRequest("POST", endpoint, bytes.NewReader([]byte(payload)))
+func post(endpoint string, insecure bool, identity auth.UserIdentity, headers map[string]string, body *bytes.Buffer) (httpResult HTTPResult) {
+	req, err := http.NewRequest("POST", endpoint, body)
 	if err != nil {
 		return HTTPResult{err: err}
 	}
