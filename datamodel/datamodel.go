@@ -141,6 +141,13 @@ func (cf CustomField) Type() string {
 	return fmt.Sprintf("%s", cf["type"])
 }
 
+func (cf CustomField) Size() int {
+	if cf["size"] == nil {
+		return 256
+	}
+	return cf["size"].(int)
+}
+
 func (cf CustomField) ValueByType(value any) any {
 	if value == nil {
 		return nil
