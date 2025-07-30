@@ -113,19 +113,25 @@ func CreateEntity(w http.ResponseWriter, r *http.Request, domainEntity datamodel
 
 	domainEntity.SetMetadata(userIdentity, subject)
 
-	err = saveEntity(domainEntity)
+	err = ReplaceEntity(domainEntity, userIdentity)
 	if err != nil {
-		httpcomm.SetResponseError(&w, fmt.Sprintf("Unable to save %s into the database. UUID: %s", subject, domainEntity.UUID()), err, http.StatusInternalServerError)
-		return
-	}
-
-	err = overview.UpdateOverviewRow(userIdentity, domainEntity)
-	if err != nil {
-		httpcomm.SetResponseError(&w, fmt.Sprintf("could not create or update an overview row. UUID: %s", domainEntity.UUID()), err, http.StatusInternalServerError)
+		httpcomm.SetResponseError(&w, "", err, http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
+}
+
+func ReplaceEntity(domainEntity datamodel.DomainEntity, userIdentity auth.UserIdentity) error {
+	err := saveEntity(domainEntity)
+	if err != nil {
+		return fmt.Errorf("unable to save %s into the database. UUID: %s. Error: %v", domainEntity.CollectionName(), domainEntity.UUID(), err)
+	}
+	err = overview.UpdateOverviewRow(userIdentity, domainEntity)
+	if err != nil {
+		return fmt.Errorf("could not create or update an overview row. UUID: %s. Error: %v", domainEntity.UUID(), err)
+	}
+	return nil
 }
 
 func saveEntity(domainEntity datamodel.DomainEntity) error {
