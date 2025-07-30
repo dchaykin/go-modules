@@ -44,6 +44,13 @@ func TestCustomFieldValueByType(t *testing.T) {
 
 	field["type"] = FieldTypeDate
 	require.Equal(t, "2025", field.ValueByType("2025"))
+
+	field = CustomField{
+		"type": FieldTypeString,
+		"size": 1024,
+	}
+	require.Equal(t, int64(1024), field.Size())
+
 }
 
 type testDomainEntity struct {

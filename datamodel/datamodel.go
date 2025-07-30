@@ -146,11 +146,15 @@ func (cf CustomField) Size() int64 {
 	if cf["size"] == nil {
 		return 256
 	}
-	size := fmt.Sprintf("%s", cf["size"])
+	size := fmt.Sprintf("%v", cf["size"])
 	if size == "" {
 		return 256
 	}
-	return helper.Int64FromString(size)
+	result := helper.Int64FromString(size)
+	if result == 0 {
+		return 256
+	}
+	return result
 }
 
 func (cf CustomField) ValueByType(value any) any {
