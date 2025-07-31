@@ -170,6 +170,24 @@ func (cf CustomField) ValueByType(value any) any {
 		if len(date) >= 10 {
 			return date[:10]
 		}
+	case FieldTypeDateTime:
+		date := fmt.Sprintf("%s", value)
+		return helper.ParseDateTimeToMysql(date)
+	case FieldTypeRichtext:
+		text := fmt.Sprintf("%s", value)
+		if len(text) > int(cf.Size()) {
+			text = helper.HtmlToText(text)
+			if len(text) > int(cf.Size()) {
+				text = text[:cf.Size()]
+			}
+		}
+		return text
+	case FieldTypeString:
+		text := fmt.Sprintf("%s", value)
+		if len(text) > int(cf.Size()) {
+			text = text[:cf.Size()]
+		}
+		return text
 	}
 	return value
 }

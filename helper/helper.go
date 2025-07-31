@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
+
+	"golang.org/x/net/html"
 
 	"github.com/dchaykin/go-modules/log"
 )
@@ -55,4 +58,24 @@ func Int64FromString(value string) int64 {
 	}
 	log.Errorf("Could not parse %s into int64: %v", value, err)
 	return 0
+}
+
+func HtmlToText(htmlInput string) string {
+	doc, err := html.Parse(strings.NewReader(htmlInput))
+	if err != nil {
+		log.Error(log.WrapError(err))
+		return htmlInput
+	}
+	var sb strings.Builder
+	extractText(doc, &sb)
+	return sb.String()
+}
+
+func extractText(n *html.Node, sb *strings.Builder) {
+	if n.Type == html.TextNode {
+		sb.WriteString(n.Data)
+	}
+	for c := n.FirstChild; c != nil; c = c.NextSibling {
+		extractText(c, sb)
+	}
 }
