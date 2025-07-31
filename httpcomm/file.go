@@ -7,21 +7,10 @@ import (
 	"io"
 	"mime/multipart"
 	"os"
-	"time"
 
 	"github.com/dchaykin/go-modules/auth"
 	"github.com/dchaykin/go-modules/log"
 )
-
-type MetaData struct {
-	OriginalFileName string    `json:"filename"`
-	FileSize         int64     `json:"size"`
-	Author           string    `json:"author"`
-	Partner          string    `json:"partner"`
-	MimeType         string    `json:"mime"`
-	Error            *string   `json:"error,omitempty"`
-	Timestamp        time.Time `json:"createdAt"`
-}
 
 func retrieveMetaData(fileUUID string, userIdentity auth.UserIdentity) (*MetaData, error) {
 	log.Debug("Downloading metadata for file %s", fileUUID)
