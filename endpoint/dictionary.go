@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/dchaykin/go-modules/log"
+	"github.com/dchaykin/mygolib/log"
 	"github.com/gorilla/mux"
 )
 

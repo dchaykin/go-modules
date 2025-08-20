@@ -8,13 +8,13 @@ import (
 	"mime/multipart"
 	"os"
 
-	"github.com/dchaykin/go-modules/auth"
 	"github.com/dchaykin/go-modules/datamodel"
-	"github.com/dchaykin/go-modules/httpcomm"
-	"github.com/dchaykin/go-modules/log"
+	"github.com/dchaykin/go-modules/user"
+	"github.com/dchaykin/mygolib/httpcomm"
+	"github.com/dchaykin/mygolib/log"
 )
 
-func retrieveMetaData(fileUUID string, userIdentity auth.UserIdentity) (*datamodel.MetaData, error) {
+func retrieveMetaData(fileUUID string, userIdentity user.UserIdentity) (*datamodel.MetaData, error) {
 	log.Debug("Downloading metadata for file %s", fileUUID)
 
 	ep := fmt.Sprintf("https://%s/app-cloudfile/api/metadata/%s", os.Getenv("MYHOST"), fileUUID)
@@ -47,7 +47,7 @@ func retrieveMetaData(fileUUID string, userIdentity auth.UserIdentity) (*datamod
 	return &md, nil
 }
 
-func DownloadFile(fileUUID, path string, userIdentity auth.UserIdentity) (*datamodel.MetaData, error) {
+func DownloadFile(fileUUID, path string, userIdentity user.UserIdentity) (*datamodel.MetaData, error) {
 	md, err := retrieveMetaData(fileUUID, userIdentity)
 	if err != nil {
 		return nil, log.WrapError(err)
@@ -69,7 +69,7 @@ func DownloadFile(fileUUID, path string, userIdentity auth.UserIdentity) (*datam
 	return md, nil
 }
 
-func UploadFile(pathToFile string, userIdentity auth.UserIdentity) (string, *datamodel.MetaData, error) {
+func UploadFile(pathToFile string, userIdentity user.UserIdentity) (string, *datamodel.MetaData, error) {
 	log.Debug("Uploading file %s", pathToFile)
 	if userIdentity == nil {
 		return "", nil, log.WrapError(fmt.Errorf("userIdentity is nil, could not upload file %s", pathToFile))

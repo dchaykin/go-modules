@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/dchaykin/go-modules/database"
-	"github.com/dchaykin/go-modules/helper"
+	"github.com/dchaykin/mygolib/helper"
 	"github.com/stretchr/testify/require"
 )
 

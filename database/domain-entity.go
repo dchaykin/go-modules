@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/dchaykin/go-modules/auth"
-	"github.com/dchaykin/go-modules/log"
+	"github.com/dchaykin/go-modules/user"
+	"github.com/dchaykin/mygolib/log"
 )
 
 type AccessConfig struct {
@@ -29,8 +29,8 @@ type DomainEntity interface {
 	GetAccessConfig() []AccessConfig
 	CleanNil()
 	BeforeSave(session DatabaseSession) error
-	SetUserIdentity(userIdentity auth.UserIdentity)
-	UserIdentity() auth.UserIdentity
+	SetUserIdentity(userIdentity user.UserIdentity)
+	UserIdentity() user.UserIdentity
 
 	NormalizePrimitives()
 	ApplyMapper()

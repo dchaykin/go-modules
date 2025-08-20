@@ -6,16 +6,17 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/dchaykin/go-modules/auth"
-	"github.com/dchaykin/go-modules/httpcomm"
-	"github.com/dchaykin/go-modules/log"
+	"github.com/dchaykin/go-modules/user"
+	"github.com/dchaykin/mygolib/auth"
+	"github.com/dchaykin/mygolib/httpcomm"
+	"github.com/dchaykin/mygolib/log"
 )
 
 type token struct {
 	Token string `json:"token"`
 }
 
-func CreateUserIdentityByCredentials(username, password, secret string) (auth.UserIdentity, error) {
+func CreateUserIdentityByCredentials(username, password, secret string) (user.UserIdentity, error) {
 	payload := fmt.Appendf(nil, `{"username":"%s","password":"%s"}`, username, password)
 	endpoint := fmt.Sprintf("https://%s/app-config/auth", os.Getenv("MYHOST"))
 	resp := httpcomm.Post(endpoint, nil, nil, payload)
@@ -29,5 +30,10 @@ func CreateUserIdentityByCredentials(username, password, secret string) (auth.Us
 		return nil, log.WrapError(err)
 	}
 
-	return auth.GetUserIdentity(t.Token, secret)
+	result, err := auth.GetUserIdentity(t.Token, secret)
+	if err != nil {
+		return nil, log.WrapError(err)
+	}
+
+	return result.(user.UserIdentity), nil
 }

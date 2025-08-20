@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/dchaykin/go-modules/helper"
+	"github.com/dchaykin/mygolib/helper"
 	"github.com/stretchr/testify/require"
 )
 

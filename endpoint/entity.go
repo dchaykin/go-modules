@@ -7,17 +7,17 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/dchaykin/go-modules/auth"
 	"github.com/dchaykin/go-modules/database"
 	"github.com/dchaykin/go-modules/datamodel"
-	"github.com/dchaykin/go-modules/httpcomm"
-	"github.com/dchaykin/go-modules/log"
 	"github.com/dchaykin/go-modules/overview"
+	"github.com/dchaykin/go-modules/user"
+	"github.com/dchaykin/mygolib/httpcomm"
+	"github.com/dchaykin/mygolib/log"
 	"github.com/gorilla/mux"
 )
 
 func GetMenuItemsFromRequest(w http.ResponseWriter, r *http.Request, appName, menuFile string) {
-	userIdentity, err := auth.GetUserIdentityFromRequest(*r)
+	userIdentity, err := user.GetUserIdentityFromRequest(*r)
 	if err != nil {
 		httpcomm.SetResponseError(&w, "", err, http.StatusUnauthorized)
 		return
@@ -38,7 +38,7 @@ func GetMenuItemsFromRequest(w http.ResponseWriter, r *http.Request, appName, me
 }
 
 func GetTenantConfig(w http.ResponseWriter, r *http.Request, configFile, appName string) *datamodel.TenantConfig {
-	userIdentity, err := auth.GetUserIdentityFromRequest(*r)
+	userIdentity, err := user.GetUserIdentityFromRequest(*r)
 	if err != nil {
 		httpcomm.SetResponseError(&w, "", err, http.StatusUnauthorized)
 		return nil
@@ -98,7 +98,7 @@ func CreateEntity(w http.ResponseWriter, r *http.Request, domainEntity database.
 
 	log.Debug("creating entity for app: %s, payload: %s", appName, string(body))
 
-	userIdentity, err := auth.GetUserIdentityFromRequest(*r)
+	userIdentity, err := user.GetUserIdentityFromRequest(*r)
 	if err != nil {
 		httpcomm.SetResponseError(&w, "", err, http.StatusUnauthorized)
 		return

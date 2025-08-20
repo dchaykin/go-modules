@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/dchaykin/go-modules/database"
-	"github.com/dchaykin/go-modules/log"
+	"github.com/dchaykin/mygolib/log"
 )
 
 func GenerateUUID() (string, error) {

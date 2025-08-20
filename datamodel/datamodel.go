@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/dchaykin/go-modules/helper"
-	"github.com/dchaykin/go-modules/log"
+	"github.com/dchaykin/mygolib/helper"
+	"github.com/dchaykin/mygolib/log"
 )
 
 const (

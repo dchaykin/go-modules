@@ -6,9 +6,9 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/dchaykin/go-modules/auth"
 	"github.com/dchaykin/go-modules/database"
-	"github.com/dchaykin/go-modules/httpcomm"
+	"github.com/dchaykin/go-modules/user"
+	"github.com/dchaykin/mygolib/httpcomm"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -29,14 +29,14 @@ type Record struct {
 	Fields   map[string]any `json:"entity" bson:"entity"`
 	Mapper   Mapper         `json:"mapper" bson:"mapper"`
 
-	userIdentity auth.UserIdentity `bson:"-"`
+	userIdentity user.UserIdentity `bson:"-"`
 }
 
-func (r Record) UserIdentity() auth.UserIdentity {
+func (r Record) UserIdentity() user.UserIdentity {
 	return r.userIdentity
 }
 
-func (r *Record) SetUserIdentity(userIdentity auth.UserIdentity) {
+func (r *Record) SetUserIdentity(userIdentity user.UserIdentity) {
 	r.userIdentity = userIdentity
 }
 

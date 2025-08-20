@@ -6,14 +6,14 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/dchaykin/go-modules/auth"
 	"github.com/dchaykin/go-modules/database"
 	"github.com/dchaykin/go-modules/datamodel"
-	"github.com/dchaykin/go-modules/httpcomm"
-	"github.com/dchaykin/go-modules/log"
+	"github.com/dchaykin/go-modules/user"
+	"github.com/dchaykin/mygolib/httpcomm"
+	"github.com/dchaykin/mygolib/log"
 )
 
-func CreateTemporaryOverview(userIdentity auth.UserIdentity, pathToDatamodel string) error {
+func CreateTemporaryOverview(userIdentity user.UserIdentity, pathToDatamodel string) error {
 	tenant := userIdentity.Tenant()
 
 	log.Info("Creating overview for datamodel %s", pathToDatamodel)
@@ -38,7 +38,7 @@ func CreateTemporaryOverview(userIdentity auth.UserIdentity, pathToDatamodel str
 	return nil
 }
 
-func BulkInsertIntoOverview(userIdentity auth.UserIdentity, subject string, entityList []database.DomainEntity, isTemporary bool) error {
+func BulkInsertIntoOverview(userIdentity user.UserIdentity, subject string, entityList []database.DomainEntity, isTemporary bool) error {
 	recordList := []DataRecord{}
 	for _, entity := range entityList {
 
@@ -74,7 +74,7 @@ func BulkInsertIntoOverview(userIdentity auth.UserIdentity, subject string, enti
 	return nil
 }
 
-func CommitOverview(userIdentity auth.UserIdentity, subject string) error {
+func CommitOverview(userIdentity user.UserIdentity, subject string) error {
 	tenant := userIdentity.Tenant()
 
 	log.Info("Committing overview for tenant '%s', subject '%s'", tenant, subject)

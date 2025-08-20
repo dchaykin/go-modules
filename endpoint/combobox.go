@@ -3,12 +3,12 @@ package endpoint
 import (
 	"net/http"
 
-	"github.com/dchaykin/go-modules/auth"
-	"github.com/dchaykin/go-modules/httpcomm"
+	"github.com/dchaykin/go-modules/user"
+	"github.com/dchaykin/mygolib/httpcomm"
 	"github.com/gorilla/mux"
 )
 
-type onCreateCombobox func(userIdentity auth.UserIdentity, subject string, params map[string]string) (any, error)
+type onCreateCombobox func(userIdentity user.UserIdentity, subject string, params map[string]string) (any, error)
 
 func GetComboboxBySubject(w http.ResponseWriter, r *http.Request, f onCreateCombobox) {
 	vars := mux.Vars(r)
@@ -19,7 +19,7 @@ func GetComboboxBySubject(w http.ResponseWriter, r *http.Request, f onCreateComb
 		return
 	}
 
-	userIdentity, err := auth.GetUserIdentityFromRequest(*r)
+	userIdentity, err := user.GetUserIdentityFromRequest(*r)
 	if err != nil {
 		httpcomm.SetResponseError(&w, "", err, http.StatusUnauthorized)
 		return

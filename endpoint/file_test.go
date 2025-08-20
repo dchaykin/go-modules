@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/dchaykin/go-modules/auth"
-	"github.com/dchaykin/go-modules/log"
+	"github.com/dchaykin/mygolib/auth"
+	"github.com/dchaykin/mygolib/log"
 	"github.com/stretchr/testify/require"
 )
 
