@@ -1,4 +1,4 @@
-package auth
+package user
 
 import (
 	"encoding/json"
@@ -7,27 +7,21 @@ import (
 	"os"
 	"slices"
 
-	"github.com/dchaykin/go-modules/log"
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/dchaykin/mygolib/auth"
+	"github.com/dchaykin/mygolib/log"
 )
 
 type UserIdentity interface {
+	auth.SimpleUserIdentity
 	Partner() string
 	Tenant() string
 	RoleByApp(appName string) string
 	Apps() []string
-	FirstName() string
-	SurName() string
-	Email() string
-	Username() string
-	IsAdmin() bool
-	IsDeveloper() bool
-	Set(req *http.Request) error
 }
 
 type userToken struct {
-	Claims        jwt.MapClaims `json:"claims"`
-	CurrentTenant string        `json:"currentTenant"`
+	auth.UserClaims
+	CurrentTenant string `json:"currentTenant"`
 }
 
 func (j userToken) Partner() string {
@@ -87,61 +81,6 @@ func (j userToken) Tenant() string {
 	return j.CurrentTenant
 }
 
-func (j userToken) FirstName() string {
-	claim, ok := j.Claims["firstName"]
-	if !ok {
-		log.Warn("Claim 'firstName' not found")
-		return ""
-	}
-	return claim.(string)
-}
-
-func (j userToken) IsAdmin() bool {
-	claim, ok := j.Claims["admin"]
-	if !ok {
-		return false
-	}
-	return claim.(bool)
-}
-
-func (j userToken) IsDeveloper() bool {
-	if j.Username() == "dchaykin" { // TODO
-		return true
-	}
-	claim, ok := j.Claims["developer"]
-	if !ok {
-		return false
-	}
-	return claim.(bool)
-}
-
-func (j userToken) SurName() string {
-	claim, ok := j.Claims["surName"]
-	if !ok {
-		log.Warn("Claim 'surName' not found")
-		return ""
-	}
-	return claim.(string)
-}
-
-func (j userToken) Email() string {
-	claim, ok := j.Claims["eMail"]
-	if !ok {
-		log.Warn("Claim 'eMail' not found")
-		return ""
-	}
-	return claim.(string)
-}
-
-func (j userToken) Username() string {
-	claim, ok := j.Claims["userName"]
-	if !ok {
-		log.Warn("Claim 'userName' not found")
-		return ""
-	}
-	return claim.(string)
-}
-
 func GetUserIdentityFromRequest(r http.Request) (UserIdentity, error) {
 	userInfo := r.Header.Get("X-User-Info")
 	if userInfo == "" {
@@ -153,26 +92,10 @@ func GetUserIdentityFromRequest(r http.Request) (UserIdentity, error) {
 }
 
 func (j userToken) Set(req *http.Request) error {
-	authorization, err := CreateAuthorizationToken(j.Claims, os.Getenv("AUTH_SECRET"))
+	authorization, err := auth.CreateAuthorizationToken(j.Claims, os.Getenv("AUTH_SECRET"))
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Authorization", "Bearer "+string(authorization))
 	return nil
-}
-
-func GetUserIdentity(authorization, secret string) (UserIdentity, error) {
-	claims, err := parseToken(authorization, secret)
-	if err != nil {
-		return nil, err
-	}
-	return &userToken{
-		Claims:        claims,
-		CurrentTenant: "default", // TODO
-	}, nil
-}
-
-func CreateAuthorizationToken(claims jwt.MapClaims, secret string) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(secret))
 }

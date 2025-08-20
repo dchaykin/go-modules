@@ -1,4 +1,4 @@
-package httpcomm
+package endpoint
 
 import (
 	"bytes"
@@ -9,19 +9,21 @@ import (
 	"os"
 
 	"github.com/dchaykin/go-modules/auth"
+	"github.com/dchaykin/go-modules/datamodel"
+	"github.com/dchaykin/go-modules/httpcomm"
 	"github.com/dchaykin/go-modules/log"
 )
 
-func retrieveMetaData(fileUUID string, userIdentity auth.UserIdentity) (*MetaData, error) {
+func retrieveMetaData(fileUUID string, userIdentity auth.UserIdentity) (*datamodel.MetaData, error) {
 	log.Debug("Downloading metadata for file %s", fileUUID)
 
 	ep := fmt.Sprintf("https://%s/app-cloudfile/api/metadata/%s", os.Getenv("MYHOST"), fileUUID)
-	hr := Get(ep, userIdentity, nil, nil)
+	hr := httpcomm.Get(ep, userIdentity, nil, nil)
 	if err := hr.GetError(); err != nil {
 		return nil, log.WrapError(err)
 	}
 
-	sr := ServiceResponse{}
+	sr := httpcomm.ServiceResponse{}
 	if err := json.Unmarshal(hr.Answer, &sr); err != nil {
 		return nil, log.WrapError(err)
 	}
@@ -37,7 +39,7 @@ func retrieveMetaData(fileUUID string, userIdentity auth.UserIdentity) (*MetaDat
 
 	log.Debug("Metadata for file %s is downloaded: %s", fileUUID, string(data))
 
-	md := MetaData{}
+	md := datamodel.MetaData{}
 	if err := json.Unmarshal(data, &md); err != nil {
 		return nil, log.WrapError(err)
 	}
@@ -45,7 +47,7 @@ func retrieveMetaData(fileUUID string, userIdentity auth.UserIdentity) (*MetaDat
 	return &md, nil
 }
 
-func DownloadFile(fileUUID, path string, userIdentity auth.UserIdentity) (*MetaData, error) {
+func DownloadFile(fileUUID, path string, userIdentity auth.UserIdentity) (*datamodel.MetaData, error) {
 	md, err := retrieveMetaData(fileUUID, userIdentity)
 	if err != nil {
 		return nil, log.WrapError(err)
@@ -54,7 +56,7 @@ func DownloadFile(fileUUID, path string, userIdentity auth.UserIdentity) (*MetaD
 	log.Debug("Downloading file %s into %s", md.OriginalFileName, path)
 
 	ep := fmt.Sprintf("https://%s/app-cloudfile/api/file/%s", os.Getenv("MYHOST"), fileUUID)
-	hr := Get(ep, userIdentity, nil, nil)
+	hr := httpcomm.Get(ep, userIdentity, nil, nil)
 	if err := hr.GetError(); err != nil {
 		return nil, log.WrapError(err)
 	}
@@ -67,7 +69,7 @@ func DownloadFile(fileUUID, path string, userIdentity auth.UserIdentity) (*MetaD
 	return md, nil
 }
 
-func UploadFile(pathToFile string, userIdentity auth.UserIdentity) (string, *MetaData, error) {
+func UploadFile(pathToFile string, userIdentity auth.UserIdentity) (string, *datamodel.MetaData, error) {
 	log.Debug("Uploading file %s", pathToFile)
 	if userIdentity == nil {
 		return "", nil, log.WrapError(fmt.Errorf("userIdentity is nil, could not upload file %s", pathToFile))
@@ -97,7 +99,7 @@ func UploadFile(pathToFile string, userIdentity auth.UserIdentity) (string, *Met
 	}
 
 	ep := fmt.Sprintf("https://%s/app-cloudfile/api/upload", os.Getenv("MYHOST"))
-	hr := PostBuffer(ep, userIdentity, map[string]string{
+	hr := httpcomm.PostBuffer(ep, userIdentity, map[string]string{
 		"Content-Type": writer.FormDataContentType(),
 	}, &body)
 
@@ -105,7 +107,7 @@ func UploadFile(pathToFile string, userIdentity auth.UserIdentity) (string, *Met
 		return "", nil, log.WrapError(err)
 	}
 
-	sr := ServiceResponse{}
+	sr := httpcomm.ServiceResponse{}
 	err = json.Unmarshal([]byte(hr.Answer), &sr)
 	if err != nil {
 		return "", nil, log.WrapError(err)

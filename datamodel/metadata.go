@@ -1,4 +1,4 @@
-package httpcomm
+package datamodel
 
 import (
 	"encoding/json"
