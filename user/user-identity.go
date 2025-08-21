@@ -75,6 +75,9 @@ func (j userToken) tenantList() []string {
 }
 
 func (j userToken) Tenant() string {
+	if j.CurrentTenant == "" {
+		return "default"
+	}
 	if slices.Contains(j.tenantList(), j.CurrentTenant) {
 		return j.CurrentTenant
 	}
